@@ -1,0 +1,28 @@
+int $cc_doesShelfExist = `shelfLayout -query -ex "CreativeCase"`;
+
+if ($cc_doesShelfExist == 1)
+{
+	string $shelfButtons[] = `shelfLayout -q -ca "CreativeCase"`;
+	int $ex_b01,$ex_b02 = 0;
+
+	for( $i=0; $i<size($shelfButtons); ++$i )
+	{
+		if( `control -exists $shelfButtons[$i]` == true)
+		{
+			if (`control -q -docTag $shelfButtons[$i]` == "pg_createPgButton") {$ex_b01 = 1;}
+			if (`control -q -docTag $shelfButtons[$i]` == "pg_addMuscleButton") {$ex_b02 = 1;}
+		}
+	}
+
+	if ($ex_b01 == 0) {shelfButton -p "CreativeCase" -dtg "pg_createPgButton" -annotation "Add a PrimGen modifier on its own or to curves" -image1 "primitiveGenerator.png" -command "primitiveGeneratorCommand";}
+	if ($ex_b02 == 0) {shelfButton -p "CreativeCase" -dtg "pg_addMuscleButton" -annotation "Add a PrimGen muscle modifier to the scene" -image1 "primitiveGenerator_muscle.png" -command "primitiveGeneratorCommand -muscle 1";}
+
+}
+
+	
+if ($cc_doesShelfExist == false)
+{
+		shelfLayout -cellWidth 33 -cellHeight 33 -p $gShelfTopLevel CreativeCase;
+		shelfButton -p "CreativeCase" -dtg "pg_createPgButton" -annotation "Add a PrimGen modifier on its own or to curves" -image1 "primitiveGenerator.png" -command "primitiveGeneratorCommand";
+		shelfButton -p "CreativeCase" -dtg "pg_addMuscleButton" -annotation "Add a PrimGen muscle modifier to the scene" -image1 "primitiveGenerator_muscle.png" -command "primitiveGeneratorCommand -muscle 1";
+}

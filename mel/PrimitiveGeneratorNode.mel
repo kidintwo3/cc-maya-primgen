@@ -1,0 +1,184 @@
+//deleteUI AttrEdprimitiveGeneratorFormLayout;
+global proc AEprimitiveGeneratorTemplate( string $nodeName )
+{
+    
+    //editorTemplate -callCustom "AE_referenceCurve_base_create" "AE_referenceCurve_base_edit" "";
+    
+    editorTemplate -beginScrollLayout;
+ 
+    editorTemplate -beginLayout "Profile" -collapse 0;
+        editorTemplate -addControl "profilePresets";
+        editorTemplate -addControl "radius";
+        editorTemplate -addControl "width";
+        editorTemplate -addControl "height";
+		editorTemplate -label "Custom Sides" -addControl "sides";
+    editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Segments" -collapse 0;
+		editorTemplate -label "Segments" -addControl "segments";
+		editorTemplate -addControl "autoSegmentsMultiplier";
+		editorTemplate -label "Auto segments" -addControl "autoSegments";
+		editorTemplate -label "Segments at knots only" -addControl "autoSegmentsKnotsOnly";
+		
+    editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Segments Translation" -collapse 0;
+		editorTemplate -label "Rotation" -addControl "rotate";
+		editorTemplate -label "Twist" -addControl "twist";
+		editorTemplate -label "Offset curve normal" -addControl "curveZOffset";
+    editorTemplate -endLayout;
+    
+    editorTemplate -beginLayout "Ramp Deformer Attributes" -collapse 0;
+            AEaddRampControl( $nodeName + ".segmentsRamp" );
+    editorTemplate -endLayout;
+    
+    editorTemplate -beginLayout "UV settings" -collapse 0;
+        editorTemplate -addControl "capUvSize";
+        editorTemplate -addControl "uOffset";
+        editorTemplate -addControl "vOffset";
+        editorTemplate -addControl "uOffsetCap";
+        editorTemplate -addControl "vOffsetCap";
+        editorTemplate -addControl "uWidth";
+        editorTemplate -addControl "vWidth";
+        editorTemplate -addControl "uvRotate";
+    editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Custom input Curve" -collapse 0;
+		editorTemplate -callCustom "AE_referenceCurve_create" "AE_referenceCurve_edit" ""; 
+	editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Muscle Jiggle / A-B only" -collapse 0;
+		editorTemplate -label "Enabled" -addControl "jiggleEnabled";
+		editorTemplate -label "Jiggle Amount" -addControl "jiggle";
+		editorTemplate -addControl "stiffness";
+		editorTemplate -addControl "damping";
+		editorTemplate -addControl "startFrame";
+	editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Global switches" -collapse 0;
+        editorTemplate -addControl "smoothNormals";
+        editorTemplate -addControl "capTop";
+    editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Plug-in Info" -collapse 1;
+		editorTemplate -callCustom "AE_primgen_website_create" "AE_primgen_website_edit" "";
+	editorTemplate -endLayout;
+	
+	AEabstractBaseCreateTemplate $nodeName;
+	
+    editorTemplate -addExtraControls;
+	editorTemplate -endScrollLayout;
+	
+
+	
+	editorTemplate -suppress "outMesh";
+	editorTemplate -suppress "inCurve";
+	
+	editorTemplate -suppress "locatorAPos";
+	editorTemplate -suppress "locatorBPos";
+	editorTemplate -suppress "firstUpVecX";
+	editorTemplate -suppress "firstUpVecY";
+	editorTemplate -suppress "firstUpVecZ";
+	editorTemplate -suppress "firstUpVec";
+	
+	// Legacy
+	editorTemplate -suppress "segmentsLoop";
+}
+
+
+
+
+// ----------------------------
+
+global proc AE_primgen_launch_website()
+{
+    launch -web "http://gumroad.com/creativecase";
+}
+
+global proc AE_primgen_website_create(string $attrName)
+{
+	string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    rowLayout -numberOfColumns 3 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
+    text -al "left" -label "Support / Info";
+    textField -ed false;
+    iconTextButton -al "left" -ann "Gumroad Page" -style "iconOnly" -image1 "shellModNode_CCLogo.png" -c "AE_primgen_launch_website()";
+
+    setParent ..;
+}
+
+global proc AE_primgen_website_edit(string $attrName)
+{
+
+}
+
+global proc AE_referenceCurve_create(string $attrName)
+{
+	string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    
+    string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
+    
+    rowLayout -numberOfColumns 4 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
+    text -al "left" -label "Input Curve";
+    textField -ed false -bgc 0.5 0.5 0.5 -tx $sm_pr_inputCurve[0] "t_refName";
+    button -label "Set" -h 20 -w 40 -bgc 0.2 0.8 0.6 -c  ("AE_referenceCurve_add " + $nodeName[0] ) "pres_refcurve_set";
+    button -label "Remove" -h 20 -w 50 -bgc 0.8 0.2 0.3 -c  ("AE_referenceCurve_remove " + $nodeName[0] ) "pres_refcurve_remove";
+    setParent ..;
+}
+
+
+global proc AE_referenceCurve_edit(string $attrName)
+{
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    
+	
+	button -edit -c ("AE_referenceCurve_add " + $nodeName[0] ) "pres_refcurve_set";
+	button -edit -c ("AE_referenceCurve_remove " + $nodeName[0] ) "pres_refcurve_remove";
+	
+	string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
+	textField -edit -tx $sm_pr_inputCurve[0] "t_refName";
+}
+
+global proc AE_referenceCurve_add(string $attrName)
+{
+	
+	string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+	
+    string $sel[] = `ls -sl`;
+    if (size($sel) > 0) 
+    {
+        string $selShape[] = `listRelatives -shapes $sel[0]`;
+        if (size($selShape) > 0) 
+        {
+            string $nodeType;
+            $nodeType = `nodeType $selShape[0]`;
+            
+            if( $nodeType == "nurbsCurve")
+            {
+                connectAttr -force ($selShape[0]+".local") ($nodeName[0]+".refCurve") ;
+                textField -edit -bgc 0.5 0.5 0.5 -tx $selShape[0] "t_refName";
+            }
+        }
+    }
+	
+    
+}
+
+global proc AE_referenceCurve_remove(string $attrName)
+{
+	
+	string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    
+    string $pg_list_inputCurves[] = eval("listConnections " + $nodeName[0] + ".refCurve");
+    if (size($pg_list_inputCurves) > 0) 
+    {
+        eval("disconnectAttr " + $pg_list_inputCurves[0] + ".local" + " " + $nodeName[0] + ".refCurve");
+        textField -edit -bgc 0.5 0.5 0.5 -tx ""  "t_refName";
+    }
+
+    
+}
