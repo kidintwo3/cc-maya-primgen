@@ -15,20 +15,20 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\AETemplate.h" />
-    <ClInclude Include="src\DagUtils.h" />
-    <ClInclude Include="src\icons.h" />
-    <ClInclude Include="src\PrimitiveGeneratorCommand.h" />
-    <ClInclude Include="src\PrimitiveGeneratorLoc.h" />
-    <ClInclude Include="src\PrimitiveGeneratorNode.h" />
-    <ClInclude Include="src\PrimitiveGeneratorProfiles.h" />
+    <ClInclude Include="..\..\src\AETemplate.h" />
+    <ClInclude Include="..\..\src\DagUtils.h" />
+    <ClInclude Include="..\..\src\icons.h" />
+    <ClInclude Include="..\..\src\PrimitiveGeneratorCommand.h" />
+    <ClInclude Include="..\..\src\PrimitiveGeneratorLoc.h" />
+    <ClInclude Include="..\..\src\PrimitiveGeneratorNode.h" />
+    <ClInclude Include="..\..\src\PrimitiveGeneratorProfiles.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\DagUtils.cpp" />
-    <ClCompile Include="src\PluginMain.cpp" />
-    <ClCompile Include="src\PrimitiveGeneratorCommand.cpp" />
-    <ClCompile Include="src\PrimitiveGeneratorLoc.cpp" />
-    <ClCompile Include="src\PrimitiveGeneratorNode.cpp" />
+    <ClCompile Include="..\..\src\DagUtils.cpp" />
+    <ClCompile Include="..\..\src\PluginMain.cpp" />
+    <ClCompile Include="..\..\src\PrimitiveGeneratorCommand.cpp" />
+    <ClCompile Include="..\..\src\PrimitiveGeneratorLoc.cpp" />
+    <ClCompile Include="..\..\src\PrimitiveGeneratorNode.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <Keyword>Win32Proj</Keyword>
