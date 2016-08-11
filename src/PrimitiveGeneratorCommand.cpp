@@ -24,7 +24,7 @@ MSyntax primitiveGeneratorCommand::newSyntax()
 	syntax.addFlag( "-r", "-remove", MSyntax::kString );
 	syntax.addFlag( "-m", "-muscle", MSyntax::kBoolean );
 
-	syntax.setObjectType( MSyntax::kSelectionList, 1, 1 );
+	syntax.setObjectType( MSyntax::kSelectionList, 0, 1 );
 	syntax.useSelectionAsDefault( true );
 
 	syntax.enableEdit( false );
