@@ -58,6 +58,7 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 	editorTemplate -beginLayout "Global switches" -collapse 0;
         editorTemplate -addControl "smoothNormals";
         editorTemplate -addControl "capTop";
+		editorTemplate -addControl "baseMeshDisplayOverride";
     editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Plug-in Info" -collapse 1;

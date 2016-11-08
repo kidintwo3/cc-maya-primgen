@@ -53,6 +53,10 @@ MObject     primitiveGenerator::aUWidth;
 MObject     primitiveGenerator::aVWidth;
 MObject     primitiveGenerator::aUVRotate;
 
+// Overrides
+
+MObject		primitiveGenerator::aDisableBaseMeshOverride;
+
 // Jiggle
 
 
@@ -900,6 +904,44 @@ MPoint primitiveGenerator::rotate_point(float cx,float cy,float angle, MPoint p)
 	return p;
 }
 
+MStatus primitiveGenerator::displayOverride()
+{
+
+	MStatus status;
+
+	MPlug p_outMesh( this->thisMObject(), aOutMesh );
+
+	if (p_outMesh.isConnected())
+	{
+		// -----------------------------------------------
+		// Collect output plug mesh's name
+
+		MPlugArray outputs_plugArr;
+		p_outMesh.connectedTo(outputs_plugArr, false, true, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
+		if (outputs_plugArr.length() > 0)
+		{
+			MPlug outMeshPlug_shape = outputs_plugArr[0];
+			MFnDependencyNode outMesh_dn(outMeshPlug_shape.node());
+
+
+			MPlug p_out_overrideEnabled = outMesh_dn.findPlug("overrideEnabled", false, &status);
+			CHECK_MSTATUS_AND_RETURN_IT(status);
+			p_out_overrideEnabled.setBool(m_disableBaseMeshOverride);
+
+			MPlug p_out_overrideDisplayType = outMesh_dn.findPlug("overrideDisplayType", false, &status);
+			CHECK_MSTATUS_AND_RETURN_IT(status);
+			p_out_overrideDisplayType.setInt(2);
+		}
+
+	}
+
+
+	return MS::kSuccess;
+}
+
+
 
 MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 {
@@ -909,6 +951,7 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	MPlug p_refcurve( this->thisMObject(), aRefCurve );
 	MPlug p_inLocA( this->thisMObject(), aInLocAPos );
 	MPlug p_inLocB( this->thisMObject(), aInLocBPos );
+	
 
 	if ( plug != aOutMesh)
 	{
@@ -984,6 +1027,11 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	m_vOffsetCap            = data.inputValue( aVOffsetCap, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_uvRotate				= data.inputValue( aUVRotate, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+
+	// Override
+	m_disableBaseMeshOverride = data.inputValue(aDisableBaseMeshOverride, &status).asBool();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	// Jiggle
@@ -1115,7 +1163,13 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 			}
 
 			m_useProfile = true;
-			m_sides = ref_cvA.length(); m_profilePointsA.setLength(m_sides); for (int i = 0; i < m_sides; i++) { m_profilePointsA.set(MPoint(rev_cvA[i][0]  , rev_cvA[i][1]  , rev_cvA[i][2]  ), i); }
+			m_sides = ref_cvA.length();
+			m_profilePointsA.setLength(m_sides);
+
+			for (int i = 0; i < m_sides; i++)
+			{
+				m_profilePointsA.set(MPoint(rev_cvA[i][0]  , rev_cvA[i][1]  , rev_cvA[i][2]  ), i); 
+			}
 
 
 		}
@@ -1137,6 +1191,9 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 
 
 	hOutput.set( newMeshData );
+
+	status = displayOverride();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 	return MS::kSuccess;
 }
@@ -1446,6 +1503,15 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aUVRotate );
 
+	// Overrides
+
+	primitiveGenerator::aDisableBaseMeshOverride = nAttr.create("baseMeshDisplayOverride", "baseMeshDisplayOverride", MFnNumericData::kBoolean);
+	nAttr.setStorable(true);
+	nAttr.setDefault(true);
+	nAttr.setKeyable(true);
+	nAttr.setChannelBox(true);
+	addAttribute(primitiveGenerator::aDisableBaseMeshOverride);
+
 	// Jiggle
 	//
 
@@ -1527,6 +1593,9 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aCurveZOffset, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegmentRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aProfilePresets, primitiveGenerator::aOutMesh);
+
+	// Override
+	attributeAffects(primitiveGenerator::aDisableBaseMeshOverride, primitiveGenerator::aOutMesh);
 
 	// UV
 

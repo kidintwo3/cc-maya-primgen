@@ -74,6 +74,7 @@ MString mel_AETemplate()
 		"	editorTemplate -beginLayout \"Global switches\" -collapse 0;\r\n"
 		"        editorTemplate -addControl \"smoothNormals\";\r\n"
 		"        editorTemplate -addControl \"capTop\";\r\n"
+		"		editorTemplate -addControl \"baseMeshDisplayOverride\";\r\n"
 		"    editorTemplate -endLayout;\r\n"
 		"	\r\n"
 		"	editorTemplate -beginLayout \"Plug-in Info\" -collapse 1;\r\n"

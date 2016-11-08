@@ -83,6 +83,8 @@ public:
 	
 	MStatus				jiggle_calculate(MFloatVector goal);
 
+	MStatus				displayOverride();
+
 	static void			aboutToDeleteCB( MObject& node, MDGModifier& modifier, void* clientData );
 
 	static MTypeId      id;
@@ -135,6 +137,9 @@ public:
 	static MObject      aVWidth;
 	static MObject      aUVRotate;
 
+	// Overrides
+	static MObject		aDisableBaseMeshOverride;
+
 	// Jiggle
 
 	static MObject		aJiggleEnabled;
@@ -177,6 +182,7 @@ private:
 	MPoint				m_currentPosition;
 	MPoint				m_previousPosition;
 	bool				m_init;
+	bool				m_disableBaseMeshOverride;
 
 	MFloatVector		m_jiggleVector;
 

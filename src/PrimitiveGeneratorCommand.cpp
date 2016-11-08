@@ -85,16 +85,18 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		assignInitialShadingGroup(o_outputMesh);
 
 
-		// Overrides on output mesh
+		// Depricated - Now done during runtime with optional plug
 
-		MFnDependencyNode mfDgN_out(o_outputMesh);
-		MPlug p_overrideEnabled = mfDgN_out.findPlug("overrideEnabled", false, &status);
-		CHECK_MSTATUS_AND_RETURN_IT(status);
-		MPlug p_overrideDisplayType = mfDgN_out.findPlug("overrideDisplayType", false, &status);
-		CHECK_MSTATUS_AND_RETURN_IT(status);
+		//// Overrides on output mesh
 
-		p_overrideEnabled.setBool(true);
-		p_overrideDisplayType.setInt(2);
+		//MFnDependencyNode mfDgN_out(o_outputMesh);
+		//MPlug p_overrideEnabled = mfDgN_out.findPlug("overrideEnabled", false, &status);
+		//CHECK_MSTATUS_AND_RETURN_IT(status);
+		//MPlug p_overrideDisplayType = mfDgN_out.findPlug("overrideDisplayType", false, &status);
+		//CHECK_MSTATUS_AND_RETURN_IT(status);
+
+		//p_overrideEnabled.setBool(true);
+		//p_overrideDisplayType.setInt(2);
 
 
 
@@ -136,16 +138,16 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	MRampAttribute a_Ramp(a_curveAttribute);
 
-	// Overrides on output mesh
+	//// Overrides on output mesh
 
-	MFnDependencyNode mfDgN_out(o_outputMesh);
-	MPlug p_overrideEnabled = mfDgN_out.findPlug("overrideEnabled", false, &status);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
-	MPlug p_overrideDisplayType = mfDgN_out.findPlug("overrideDisplayType", false, &status);
-	CHECK_MSTATUS_AND_RETURN_IT(status);
+	//MFnDependencyNode mfDgN_out(o_outputMesh);
+	//MPlug p_overrideEnabled = mfDgN_out.findPlug("overrideEnabled", false, &status);
+	//CHECK_MSTATUS_AND_RETURN_IT(status);
+	//MPlug p_overrideDisplayType = mfDgN_out.findPlug("overrideDisplayType", false, &status);
+	//CHECK_MSTATUS_AND_RETURN_IT(status);
 
-	p_overrideEnabled.setBool(true);
-	p_overrideDisplayType.setInt(2);
+	//p_overrideEnabled.setBool(true);
+	//p_overrideDisplayType.setInt(2);
 
 
 
