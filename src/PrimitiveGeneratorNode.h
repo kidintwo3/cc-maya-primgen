@@ -106,6 +106,8 @@ public:
 	static MObject      aUseInputCurve;
 	static MObject      aSmoothNormals;
 	static MObject      aCapTop;
+	static MObject		aAlingToUpVector;
+
 
 	static MObject		aProfilePresets;
 
@@ -155,7 +157,7 @@ private:
 	double				m_r, m_width, m_height,  m_rotate, m_twist, m_zOffset;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
 	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type;
-	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots;
+	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector;
 	short				m_profilePreset;
 	MVector				m_firstUpVec;
 	MObject				m_o_curve;

@@ -12,11 +12,15 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
         editorTemplate -addControl "width";
         editorTemplate -addControl "height";
 		editorTemplate -label "Custom Sides" -addControl "sides";
+		editorTemplate -addSeparator;
+		editorTemplate -addControl "alingToUpVector";
+		editorTemplate -addControl "firstUpVec";
     editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Segments" -collapse 0;
 		editorTemplate -label "Segments" -addControl "segments";
 		editorTemplate -addControl "autoSegmentsMultiplier";
+		editorTemplate -addSeparator;
 		editorTemplate -label "Auto segments" -addControl "autoSegments";
 		editorTemplate -label "Segments at knots only" -addControl "autoSegmentsKnotsOnly";
 		
@@ -43,12 +47,13 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
         editorTemplate -addControl "uvRotate";
     editorTemplate -endLayout;
 	
-	editorTemplate -beginLayout "Custom input Curve" -collapse 0;
+	editorTemplate -beginLayout "Custom profile Curve" -collapse 0;
 		editorTemplate -callCustom "AE_referenceCurve_create" "AE_referenceCurve_edit" ""; 
 	editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Muscle Jiggle / A-B only" -collapse 0;
 		editorTemplate -label "Enabled" -addControl "jiggleEnabled";
+		editorTemplate -addSeparator;
 		editorTemplate -label "Jiggle Amount" -addControl "jiggle";
 		editorTemplate -addControl "stiffness";
 		editorTemplate -addControl "damping";
@@ -60,6 +65,10 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
         editorTemplate -addControl "capTop";
 		editorTemplate -addControl "baseMeshDisplayOverride";
     editorTemplate -endLayout;
+    
+	editorTemplate -beginLayout "Bake Mesh" -collapse 0;
+		editorTemplate -callCustom "AE_bakeMesh_create" "AE_bakeMesh_edit" ""; 
+	editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Plug-in Info" -collapse 1;
 		editorTemplate -callCustom "AE_primgen_website_create" "AE_primgen_website_edit" "";
@@ -69,9 +78,7 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 	
     editorTemplate -addExtraControls;
 	editorTemplate -endScrollLayout;
-	
 
-	
 	editorTemplate -suppress "outMesh";
 	editorTemplate -suppress "inCurve";
 	
@@ -80,7 +87,6 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 	editorTemplate -suppress "firstUpVecX";
 	editorTemplate -suppress "firstUpVecY";
 	editorTemplate -suppress "firstUpVecZ";
-	editorTemplate -suppress "firstUpVec";
 	
 	// Legacy
 	editorTemplate -suppress "segmentsLoop";
@@ -121,7 +127,7 @@ global proc AE_referenceCurve_create(string $attrName)
     string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
     
     rowLayout -numberOfColumns 4 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
-    text -al "left" -label "Input Curve";
+    text -al "left" -label "Profile Curve";
     textField -ed false -bgc 0.5 0.5 0.5 -tx $sm_pr_inputCurve[0] "t_refName";
     button -label "Set" -h 20 -w 40 -bgc 0.2 0.8 0.6 -c  ("AE_referenceCurve_add " + $nodeName[0] ) "pres_refcurve_set";
     button -label "Remove" -h 20 -w 50 -bgc 0.8 0.2 0.3 -c  ("AE_referenceCurve_remove " + $nodeName[0] ) "pres_refcurve_remove";
@@ -141,6 +147,82 @@ global proc AE_referenceCurve_edit(string $attrName)
 	string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
 	textField -edit -tx $sm_pr_inputCurve[0] "t_refName";
 }
+
+global proc AE_bakeMesh_create(string $attrName)
+{
+	string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    
+    string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
+    
+    rowLayout -numberOfColumns 2 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
+    button -label "Bake mesh / delete node" -h 20 -w 200 -bgc 0.8 0.2 0.3 -c  ("AE_bake_and_delete_mesh " + $nodeName[0] ) "bake_mesh_and_delete";
+    button -label "Bake mesh" -h 20 -w 200 -bgc 0.2 0.8 0.6 -c  ("AE_bake_mesh " + $nodeName[0] ) "bake_mesh";
+    setParent ..;
+}
+
+
+global proc AE_bakeMesh_edit(string $attrName)
+{
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+
+	button -edit -c ("AE_bake_and_delete_mesh " + $nodeName[0] ) "bake_mesh_and_delete";
+	button -edit -c ("AE_bake_mesh " + $nodeName[0] ) "bake_mesh";
+
+}
+
+global proc AE_bake_and_delete_mesh(string $attrName)
+{
+	
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    
+    string $pg_conn_outputMeshs[] = `listConnections -d on -s off ($nodeName[0] + ".outMesh")`;
+
+    
+    if (size($pg_conn_outputMeshs) > 0) 
+    {
+        undoInfo -ock;
+
+        setAttr ($nodeName[0] + ".baseMeshDisplayOverride") 0;
+        delete $nodeName[0];
+        select -r $pg_conn_outputMeshs[0];
+        
+        undoInfo -cck;
+        
+    }
+
+}
+
+global proc AE_bake_mesh(string $attrName)
+{
+	
+string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    
+    string $pg_list_inputCurves[] = eval("listConnections " + $nodeName[0] + ".outMesh");
+    if (size($pg_list_inputCurves) > 0) 
+    {
+        
+        string $new_node_Name[] = `duplicate $pg_list_inputCurves[0]`;
+        
+        if (size($new_node_Name) > 0)
+        {
+            // find shape node and set override
+            string $new_node_shape[] = `listRelatives -s -path $new_node_Name[0]`;
+            
+            undoInfo -ock;
+            
+            setAttr ($new_node_shape[0] + ".overrideEnabled") 0;
+            select -r $new_node_Name[0];
+            
+            undoInfo -cck;
+        }
+    }
+
+}
+
 
 global proc AE_referenceCurve_add(string $attrName)
 {

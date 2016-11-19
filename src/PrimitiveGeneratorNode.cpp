@@ -24,6 +24,7 @@ MObject		primitiveGenerator::aSegmentsLoop;
 MObject     primitiveGenerator::aUseInputCurve;
 MObject     primitiveGenerator::aSmoothNormals;
 MObject     primitiveGenerator::aCapTop;
+MObject     primitiveGenerator::aAlingToUpVector;
 
 MObject     primitiveGenerator::aAutoSegments;
 MObject     primitiveGenerator::aAutoSegmentsRes;
@@ -218,13 +219,23 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 			}
 
 
+
 			MVector tan = curveFn.tangent(param , MSpace::kObject);
 			tan.normalize();
 
 			MVector cross1 = currentNormal^tan;
 			cross1.normalize() ;
 
+
+
 			MVector cross2 =  tan^cross1;
+
+			if(m_alingToUpVector)
+			{
+				cross2 = m_firstUpVec;
+			}
+
+
 			cross2.normalize();
 			currentNormal = cross2;
 
@@ -1005,6 +1016,8 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_capTop				= data.inputValue( aCapTop, &status ).asBool();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_alingToUpVector		= data.inputValue( aAlingToUpVector, &status ).asBool();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_profilePreset			= data.inputValue(aProfilePresets, &status).asShort();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_firstUpVec			= data.inputValue(aFirstUpVec, &status).asVector();
@@ -1352,6 +1365,13 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aCapTop );
 
+	primitiveGenerator::aAlingToUpVector = nAttr.create( "alingToUpVector", "alingToUpVector", MFnNumericData::kBoolean );
+	nAttr.setDefault( false );
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aAlingToUpVector );
+
 	primitiveGenerator::aOnlyKnotSegmentsRes = nAttr.create( "autoSegmentsKnotsOnly", "autoSegmentsKnotsOnly", MFnNumericData::kBoolean );
 	nAttr.setDefault( false );
 	nAttr.setKeyable( true );
@@ -1580,6 +1600,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aUseInputCurve, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSmoothNormals, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aCapTop, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aAlingToUpVector, primitiveGenerator::aOutMesh);
 
 	attributeAffects(primitiveGenerator::aOnlyKnotSegmentsRes, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aAutoSegments, primitiveGenerator::aOutMesh);
