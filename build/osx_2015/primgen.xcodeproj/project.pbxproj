@@ -1,0 +1,336 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		6135E8C51BB49B82001E2C79 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6135E8C41BB49B82001E2C79 /* OpenGL.framework */; };
+		6135E8C71BB49B9A001E2C79 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6135E8C61BB49B9A001E2C79 /* GLUT.framework */; };
+		619D2BEC1DE0C54E0031A38E /* AETemplate.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BE01DE0C54E0031A38E /* AETemplate.h */; };
+		619D2BED1DE0C54E0031A38E /* DagUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 619D2BE11DE0C54E0031A38E /* DagUtils.cpp */; };
+		619D2BEE1DE0C54E0031A38E /* DagUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BE21DE0C54E0031A38E /* DagUtils.h */; };
+		619D2BEF1DE0C54E0031A38E /* icons.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BE31DE0C54E0031A38E /* icons.h */; };
+		619D2BF01DE0C54E0031A38E /* PluginMain.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 619D2BE41DE0C54E0031A38E /* PluginMain.cpp */; };
+		619D2BF11DE0C54E0031A38E /* PrimitiveGeneratorCommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 619D2BE51DE0C54E0031A38E /* PrimitiveGeneratorCommand.cpp */; };
+		619D2BF21DE0C54E0031A38E /* PrimitiveGeneratorCommand.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BE61DE0C54E0031A38E /* PrimitiveGeneratorCommand.h */; };
+		619D2BF31DE0C54E0031A38E /* PrimitiveGeneratorLoc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 619D2BE71DE0C54E0031A38E /* PrimitiveGeneratorLoc.cpp */; };
+		619D2BF41DE0C54E0031A38E /* PrimitiveGeneratorLoc.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BE81DE0C54E0031A38E /* PrimitiveGeneratorLoc.h */; };
+		619D2BF51DE0C54E0031A38E /* PrimitiveGeneratorNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 619D2BE91DE0C54E0031A38E /* PrimitiveGeneratorNode.cpp */; };
+		619D2BF61DE0C54E0031A38E /* PrimitiveGeneratorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BEA1DE0C54E0031A38E /* PrimitiveGeneratorNode.h */; };
+		619D2BF71DE0C54E0031A38E /* PrimitiveGeneratorProfiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 619D2BEB1DE0C54E0031A38E /* PrimitiveGeneratorProfiles.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		6135E8C41BB49B82001E2C79 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		6135E8C61BB49B9A001E2C79 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
+		619D2BE01DE0C54E0031A38E /* AETemplate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AETemplate.h; path = ../../src/AETemplate.h; sourceTree = "<group>"; };
+		619D2BE11DE0C54E0031A38E /* DagUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DagUtils.cpp; path = ../../src/DagUtils.cpp; sourceTree = "<group>"; };
+		619D2BE21DE0C54E0031A38E /* DagUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DagUtils.h; path = ../../src/DagUtils.h; sourceTree = "<group>"; };
+		619D2BE31DE0C54E0031A38E /* icons.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = icons.h; path = ../../src/icons.h; sourceTree = "<group>"; };
+		619D2BE41DE0C54E0031A38E /* PluginMain.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PluginMain.cpp; path = ../../src/PluginMain.cpp; sourceTree = "<group>"; };
+		619D2BE51DE0C54E0031A38E /* PrimitiveGeneratorCommand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrimitiveGeneratorCommand.cpp; path = ../../src/PrimitiveGeneratorCommand.cpp; sourceTree = "<group>"; };
+		619D2BE61DE0C54E0031A38E /* PrimitiveGeneratorCommand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrimitiveGeneratorCommand.h; path = ../../src/PrimitiveGeneratorCommand.h; sourceTree = "<group>"; };
+		619D2BE71DE0C54E0031A38E /* PrimitiveGeneratorLoc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrimitiveGeneratorLoc.cpp; path = ../../src/PrimitiveGeneratorLoc.cpp; sourceTree = "<group>"; };
+		619D2BE81DE0C54E0031A38E /* PrimitiveGeneratorLoc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrimitiveGeneratorLoc.h; path = ../../src/PrimitiveGeneratorLoc.h; sourceTree = "<group>"; };
+		619D2BE91DE0C54E0031A38E /* PrimitiveGeneratorNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrimitiveGeneratorNode.cpp; path = ../../src/PrimitiveGeneratorNode.cpp; sourceTree = "<group>"; };
+		619D2BEA1DE0C54E0031A38E /* PrimitiveGeneratorNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrimitiveGeneratorNode.h; path = ../../src/PrimitiveGeneratorNode.h; sourceTree = "<group>"; };
+		619D2BEB1DE0C54E0031A38E /* PrimitiveGeneratorProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrimitiveGeneratorProfiles.h; path = ../../src/PrimitiveGeneratorProfiles.h; sourceTree = "<group>"; };
+		D2AAC0630554660B00DB518D /* ccCamLoc.bundle */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = ccCamLoc.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D289988505E68E00004EDB86 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6135E8C71BB49B9A001E2C79 /* GLUT.framework in Frameworks */,
+				6135E8C51BB49B82001E2C79 /* OpenGL.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* helloWorldCmdPlugin */ = {
+			isa = PBXGroup;
+			children = (
+				6135E8C61BB49B9A001E2C79 /* GLUT.framework */,
+				6135E8C41BB49B82001E2C79 /* OpenGL.framework */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				8A7F063308688F580064D097 /* Headers */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = helloWorldCmdPlugin;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				619D2BE01DE0C54E0031A38E /* AETemplate.h */,
+				619D2BE11DE0C54E0031A38E /* DagUtils.cpp */,
+				619D2BE21DE0C54E0031A38E /* DagUtils.h */,
+				619D2BE31DE0C54E0031A38E /* icons.h */,
+				619D2BE41DE0C54E0031A38E /* PluginMain.cpp */,
+				619D2BE51DE0C54E0031A38E /* PrimitiveGeneratorCommand.cpp */,
+				619D2BE61DE0C54E0031A38E /* PrimitiveGeneratorCommand.h */,
+				619D2BE71DE0C54E0031A38E /* PrimitiveGeneratorLoc.cpp */,
+				619D2BE81DE0C54E0031A38E /* PrimitiveGeneratorLoc.h */,
+				619D2BE91DE0C54E0031A38E /* PrimitiveGeneratorNode.cpp */,
+				619D2BEA1DE0C54E0031A38E /* PrimitiveGeneratorNode.h */,
+				619D2BEB1DE0C54E0031A38E /* PrimitiveGeneratorProfiles.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC0630554660B00DB518D /* ccCamLoc.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8A7F063308688F580064D097 /* Headers */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Headers;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC0600554660B00DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				619D2BF21DE0C54E0031A38E /* PrimitiveGeneratorCommand.h in Headers */,
+				619D2BEF1DE0C54E0031A38E /* icons.h in Headers */,
+				619D2BEC1DE0C54E0031A38E /* AETemplate.h in Headers */,
+				619D2BF71DE0C54E0031A38E /* PrimitiveGeneratorProfiles.h in Headers */,
+				619D2BF41DE0C54E0031A38E /* PrimitiveGeneratorLoc.h in Headers */,
+				619D2BF61DE0C54E0031A38E /* PrimitiveGeneratorNode.h in Headers */,
+				619D2BEE1DE0C54E0031A38E /* DagUtils.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC0620554660B00DB518D /* primgen */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A7F05ED086863A70064D097 /* Build configuration list for PBXNativeTarget "primgen" */;
+			buildPhases = (
+				D2AAC0600554660B00DB518D /* Headers */,
+				D2AAC0610554660B00DB518D /* Sources */,
+				D289988505E68E00004EDB86 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = primgen;
+			productName = helloWorldCmdPlugin;
+			productReference = D2AAC0630554660B00DB518D /* ccCamLoc.bundle */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0720;
+			};
+			buildConfigurationList = 8A7F05F1086863A70064D097 /* Build configuration list for PBXProject "primgen" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* helloWorldCmdPlugin */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC0620554660B00DB518D /* primgen */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC0610554660B00DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				619D2BF31DE0C54E0031A38E /* PrimitiveGeneratorLoc.cpp in Sources */,
+				619D2BED1DE0C54E0031A38E /* DagUtils.cpp in Sources */,
+				619D2BF01DE0C54E0031A38E /* PluginMain.cpp in Sources */,
+				619D2BF11DE0C54E0031A38E /* PrimitiveGeneratorCommand.cpp in Sources */,
+				619D2BF51DE0C54E0031A38E /* PrimitiveGeneratorNode.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		8A7F05EE086863A70064D097 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_EXTENSION = bundle;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREFIX_HEADER = "$(MAYA_DIRECTORY)/devkit/include/maya/OpenMayaMac.h";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_MASTER_OBJECT_FILE = YES;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = BUNDLE;
+				MACH_O_TYPE = mh_bundle;
+				MAYA_DIRECTORY = /Applications/Autodesk/maya2015;
+				OTHER_LDFLAGS = (
+					"-Wl,-executable_path,$(MAYA_DIRECTORY)/Maya.app/Contents/MacOS",
+					"-Wl,-exported_symbol,__Z16initializePlugin7MObject",
+					"-Wl,-exported_symbol,__Z18uninitializePlugin7MObject",
+					"-lOpenMaya",
+					"-lFoundation",
+					"-framework",
+					openGl,
+					"-lOpenMayaUI",
+					"-lOpenMayaRender",
+					"-lOpenMayaAnim",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = ccCamLoc;
+				ZERO_LINK = YES;
+			};
+			name = Debug;
+		};
+		8A7F05EF086863A70064D097 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_EXTENSION = bundle;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_PREFIX_HEADER = "$(MAYA_DIRECTORY)/devkit/include/maya/OpenMayaMac.h";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				GENERATE_MASTER_OBJECT_FILE = YES;
+				INSTALL_PATH = /usr/local/lib;
+				LIBRARY_STYLE = BUNDLE;
+				MACH_O_TYPE = mh_bundle;
+				MAYA_DIRECTORY = /Applications/Autodesk/maya2015;
+				OTHER_LDFLAGS = (
+					"-Wl,-executable_path,$(MAYA_DIRECTORY)/Maya.app/Contents/MacOS",
+					"-Wl,-exported_symbol,__Z16initializePlugin7MObject",
+					"-Wl,-exported_symbol,__Z18uninitializePlugin7MObject",
+					"-lOpenMaya",
+					"-lFoundation",
+					"-framework",
+					openGl,
+					"-lOpenMayaUI",
+					"-lOpenMayaRender",
+					"-lOpenMayaAnim",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = ccCamLoc;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		8A7F05F2086863A70064D097 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libstdc++";
+				ENABLE_TESTABILITY = YES;
+				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MAC_PLUGIN,
+					OSMac_,
+					REQUIRE_IOSTREAM,
+				);
+				HEADER_SEARCH_PATHS = (
+					.,
+					"$(MAYA_DIRECTORY)/devkit/include/",
+				);
+				LIBRARY_SEARCH_PATHS = "$(MAYA_DIRECTORY)/Maya.app/Contents/MacOS";
+				LIBRARY_STYLE = BUNDLE;
+				MAYA_DIRECTORY = /Applications/Autodesk/maya2016;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = (
+					"-Wl,-executable_path,$(MAYA_DIRECTORY)/Maya.app/Contents/MacOS",
+					"-Wl,-exported_symbol,__Z16initializePlugin7MObject",
+					"-Wl,-exported_symbol,__Z18uninitializePlugin7MObject",
+					"-lOpenMaya",
+					"-lFoundation",
+				);
+			};
+			name = Debug;
+		};
+		8A7F05F3086863A70064D097 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LIBRARY = "libstdc++";
+				GCC_PREFIX_HEADER = "";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					MAC_PLUGIN,
+					OSMac_,
+					REQUIRE_IOSTREAM,
+				);
+				HEADER_SEARCH_PATHS = (
+					.,
+					"$(MAYA_DIRECTORY)/devkit/include/",
+				);
+				LIBRARY_SEARCH_PATHS = "$(MAYA_DIRECTORY)/Maya.app/Contents/MacOS";
+				LIBRARY_STYLE = BUNDLE;
+				MAYA_DIRECTORY = /Applications/Autodesk/maya2016;
+				OTHER_LDFLAGS = (
+					"-Wl,-executable_path,$(MAYA_DIRECTORY)/Maya.app/Contents/MacOS",
+					"-Wl,-exported_symbol,__Z16initializePlugin7MObject",
+					"-Wl,-exported_symbol,__Z18uninitializePlugin7MObject",
+					"-lOpenMaya",
+					"-lFoundation",
+				);
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8A7F05ED086863A70064D097 /* Build configuration list for PBXNativeTarget "primgen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A7F05EE086863A70064D097 /* Debug */,
+				8A7F05EF086863A70064D097 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8A7F05F1086863A70064D097 /* Build configuration list for PBXProject "primgen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A7F05F2086863A70064D097 /* Debug */,
+				8A7F05F3086863A70064D097 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}
