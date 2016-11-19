@@ -38,7 +38,7 @@
 		619D2BE91DE0C54E0031A38E /* PrimitiveGeneratorNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PrimitiveGeneratorNode.cpp; path = ../../src/PrimitiveGeneratorNode.cpp; sourceTree = "<group>"; };
 		619D2BEA1DE0C54E0031A38E /* PrimitiveGeneratorNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrimitiveGeneratorNode.h; path = ../../src/PrimitiveGeneratorNode.h; sourceTree = "<group>"; };
 		619D2BEB1DE0C54E0031A38E /* PrimitiveGeneratorProfiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PrimitiveGeneratorProfiles.h; path = ../../src/PrimitiveGeneratorProfiles.h; sourceTree = "<group>"; };
-		D2AAC0630554660B00DB518D /* ccCamLoc.bundle */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = ccCamLoc.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2AAC0630554660B00DB518D /* primgen.bundle */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = primgen.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,7 +88,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D2AAC0630554660B00DB518D /* ccCamLoc.bundle */,
+				D2AAC0630554660B00DB518D /* primgen.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -134,7 +134,7 @@
 			);
 			name = primgen;
 			productName = helloWorldCmdPlugin;
-			productReference = D2AAC0630554660B00DB518D /* ccCamLoc.bundle */;
+			productReference = D2AAC0630554660B00DB518D /* primgen.bundle */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
@@ -211,7 +211,7 @@
 					"-lOpenMayaAnim",
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = ccCamLoc;
+				PRODUCT_NAME = primgen;
 				ZERO_LINK = YES;
 			};
 			name = Debug;
@@ -248,7 +248,7 @@
 					"-lOpenMayaAnim",
 				);
 				PREBINDING = NO;
-				PRODUCT_NAME = ccCamLoc;
+				PRODUCT_NAME = primgen;
 				ZERO_LINK = NO;
 			};
 			name = Release;
