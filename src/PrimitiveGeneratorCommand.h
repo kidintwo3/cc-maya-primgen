@@ -1,7 +1,12 @@
 #ifndef PRIMITIVEGENDCOMMAND_H
 #define PRIMITIVEGENDCOMMAND_H
 
+#ifdef __linux__
+#include <maya/MArgDatabase.h>
+#else
 #include <maya/MArgDataBase.h>
+#endif
+
 #include <maya/MDagPath.h>
 #include <maya/MDGModifier.h>
 #include <maya/MFnDagNode.h>

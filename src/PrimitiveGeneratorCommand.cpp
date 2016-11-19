@@ -1,4 +1,4 @@
-#include "primitiveGeneratorCommand.h"
+#include "PrimitiveGeneratorCommand.h"
 #include "DagUtils.h"
 
 primitiveGeneratorCommand::primitiveGeneratorCommand()
@@ -69,7 +69,7 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		MFnNurbsCurve mFnC(p_currSelShapeA[i]);
 		MGlobal::displayInfo(MString() + mFnC.length() );
 
-		int i_curveLength = int(mFnC.length());
+//		int i_curveLength = int(mFnC.length());
 
 		setPlugs(o_primGenNode, "segments", "50");
 		setPlugs(o_primGenNode, "profilePresets", "0");

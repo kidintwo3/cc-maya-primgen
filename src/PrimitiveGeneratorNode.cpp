@@ -456,7 +456,7 @@ MObject primitiveGenerator::generateStrips(){
 
 	}
 
-	int len = pA.length();
+//	int len = pA.length();
 
 	// Facecounts CAPS
 	MIntArray faceCounts;
@@ -975,11 +975,11 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	MDataHandle hRefCurve = data.inputValue(aRefCurve, &status);
 	CHECK_MSTATUS_AND_RETURN_IT( status );
 
-	MDataHandle hInLocA = data.inputValue(aInLocAPos, &status);
-	CHECK_MSTATUS_AND_RETURN_IT( status );
-
-	MDataHandle hInLocB = data.inputValue(aInLocBPos, &status);
-	CHECK_MSTATUS_AND_RETURN_IT( status );
+//	MDataHandle hInLocA = data.inputValue(aInLocAPos, &status);
+//	CHECK_MSTATUS_AND_RETURN_IT( status );
+//
+//	MDataHandle hInLocB = data.inputValue(aInLocBPos, &status);
+//	CHECK_MSTATUS_AND_RETURN_IT( status );
 
 	MDataHandle hOutput = data.outputValue( aOutMesh, &status );
 	CHECK_MSTATUS_AND_RETURN_IT( status );
