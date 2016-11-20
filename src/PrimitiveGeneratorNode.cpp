@@ -214,13 +214,13 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 
 			if (m_segOnlyKnots)
 			{
-				curveFn.getParamAtPoint(cvA[i], param);
+				curveFn.getParamAtPoint(cvA[i], param, 1.0, MSpace::kWorld);
 				p = cvA[i];
 			}
 
 
 
-			MVector tan = curveFn.tangent(param , MSpace::kObject);
+			MVector tan = curveFn.tangent(param , MSpace::kWorld);
 			tan.normalize();
 
 			MVector cross1 = currentNormal^tan;
@@ -246,7 +246,13 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 			{cross2.x, cross2.y , cross2.z, 0.0},
 			{p.x, p.y, p.z, 1.0}};
 
+
+
 			rotMatrix = m;
+
+			//rotMatrix += m_curveMatrix;
+			//p *= m_curveMatrix;
+
 			pA.append( p );
 
 			// put everything back
@@ -615,6 +621,7 @@ MObject primitiveGenerator::generateTubes()
 
 				pnt *= trM.asRotateMatrix();
 				pnt *= trMatrixA[i];
+				
 
 				pA.append( MFloatPoint( pnt ) );
 			}
@@ -636,7 +643,10 @@ MObject primitiveGenerator::generateTubes()
 				trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 				trM.setScale(scale,MSpace::kObject);
 
-				pA.append( MFloatPoint( pnt * trM.asMatrix()) );
+
+				MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
+
+				pA.append( outP );
 			}
 
 
@@ -987,6 +997,7 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	m_o_curve = hInCurve.asNurbsCurve();
 	m_o_curve_ref = hRefCurve.asNurbsCurve();
 
+
 	// ------------------------------------------------------------------------------------------
 	m_r						= data.inputValue( aRadius, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -1073,11 +1084,12 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	if (m_segments <= 1) { m_segments = 1; }
 
 
-
-
 	// AB locator
 	MMatrix m_inLocA_posM   = data.inputValue( aInLocAPos ).asMatrix();
 	MMatrix m_inLocB_posM   = data.inputValue( aInLocBPos ).asMatrix();
+
+	
+
 	MTransformationMatrix m_inLocA_posMat(m_inLocA_posM);
 	m_inLocA_pos = m_inLocA_posMat.getTranslation(MSpace::kWorld);
 	MTransformationMatrix m_inLocB_posMat(m_inLocB_posM);
@@ -1117,15 +1129,18 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	}
 
 
+	//MObject m_inCurve = data.inputValue(aInCurve, &status).asNurbsCurve();
+	//CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	//// Curve matrix
+	MFnNurbsCurve curve_fn(m_o_curve);
+	m_curveMatrix = curve_fn.dagPath().inclusiveMatrix();
+
 
 	// Ramp attribute
 	MRampAttribute a_segmentsAttribute(this->thisMObject(), aSegmentRamp, &status);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_segmentsProfileA = storeProfileCurveData(a_segmentsAttribute, m_segments, m_segmentsLoop);
-
-
-
-
 
 
 	//

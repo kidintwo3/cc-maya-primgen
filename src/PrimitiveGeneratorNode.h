@@ -163,6 +163,8 @@ private:
 	MObject				m_o_curve;
 	MObject				m_o_curve_ref;
 
+	MMatrix				m_curveMatrix;
+
 	MPointArray			m_profilePointsA;
 	MFloatArray			m_segmentsProfileA;
 
