@@ -58,6 +58,8 @@ private:
 
 	bool		m_muscle;
 
+	
+
 };
 
 

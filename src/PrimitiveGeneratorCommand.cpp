@@ -67,9 +67,9 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		connectPlug(m_DAGMod,o_primGenNode,o_outputMesh,"outMesh","inMesh");
 
 		MFnNurbsCurve mFnC(p_currSelShapeA[i]);
-		MGlobal::displayInfo(MString() + mFnC.length() );
+		// MGlobal::displayInfo(MString() + mFnC.length() );
 
-//		int i_curveLength = int(mFnC.length());
+		//		int i_curveLength = int(mFnC.length());
 
 		setPlugs(o_primGenNode, "segments", "50");
 		setPlugs(o_primGenNode, "profilePresets", "0");
@@ -256,6 +256,31 @@ MStatus primitiveGeneratorCommand::doIt( const MArgList& argList )
 		MGlobal::displayInfo(MString() + "[PrimGen] Attaching PrimGen to curves" );
 	}
 
+	if (o_primGenNodeA.length() != 0)
+	{
+
+		MStringArray strA_pg;
+		MStringArray strA_om;
+
+		for (int i = 0; i < o_primGenNodeA.length(); i++)
+		{
+			MFnDependencyNode mfDgN(o_primGenNodeA[i]);
+			strA_pg.append(mfDgN.name());
+		}
+
+
+
+		for (int i = 0; i < o_outputMeshA.length(); i++)
+		{
+			MFnDependencyNode mfDgN(o_outputMeshA[i]);
+			strA_om.append(mfDgN.name());
+		}
+
+
+		MPxCommand::clearResult();
+		MPxCommand::appendToResult(strA_pg);
+		MPxCommand::appendToResult(strA_om);
+	}
 
 
 
