@@ -21,6 +21,7 @@ MObject     primitiveGenerator::aTwist;
 MObject     primitiveGenerator::aSides;
 MObject     primitiveGenerator::aSegments;
 MObject		primitiveGenerator::aSegmentsLoop;
+MObject		primitiveGenerator::aNumstrands;
 MObject     primitiveGenerator::aUseInputCurve;
 MObject     primitiveGenerator::aSmoothNormals;
 MObject     primitiveGenerator::aCapTop;
@@ -41,8 +42,11 @@ MObject     primitiveGenerator::aFirstUpVecY;
 MObject     primitiveGenerator::aFirstUpVecZ;
 
 MObject		primitiveGenerator::aCurveZOffset;
+MObject		primitiveGenerator::aStrandOffset;
+MObject		primitiveGenerator::aStrandThinning;
 
 MObject     primitiveGenerator::aSegmentRamp;
+MObject     primitiveGenerator::aStrandOffsetRamp;
 
 // UV
 MObject     primitiveGenerator::aCapUVSize;
@@ -93,10 +97,10 @@ void* primitiveGenerator::creator()
 
 void primitiveGenerator::postConstructor(){
 	m_init = false;
-
+	srand ( time(NULL) );
 	MObject oSelf = thisMObject();
 
-		// delete callback
+	// delete callback
 	MCallbackId callbackID;
 	callbackID = MNodeMessage::addNodeAboutToDeleteCallback(oSelf, aboutToDeleteCB, this);
 	m_callbackIDs.append(callbackID);
@@ -181,7 +185,7 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 		MFnNurbsCurve curveFn(m_o_curve);
 
 
-		double length = (curveFn.length() / double(m_segments) );
+
 
 		// extra attributes
 
@@ -202,10 +206,56 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 		curveFn.getCVs(cvA, MSpace::kWorld);
 
 
+		// random array
+
+		double foo [8] = { 0.2, 0.8, 0.5, 0.1, 0.3, 0.7, 0.6, 0.9};
+		MDoubleArray rndAr(foo,8);
+
+		MDoubleArray rndArFade;
+		rndArFade.setLength(m_numstrands);
+
+		int c = 0;
+
+		for (int i =0;i < m_numstrands;i++) 
+		{
+
+			rndArFade.set(rndAr[c] * m_strandThinning,i);
+
+			c+=1;
+
+			if (c >= rndAr.length())
+			{
+				c = 0;
+			}
+
+		}
+
+
+
 		// If full spline
 
+		//for (int s=0; s < m_numstrands; s++) 
+		//{
 
-		for(int i=0; i < m_segments+1; i++){
+		//double curve_length = curveFn.length();
+		//double fadeVal = rndAr[s] * m_strandThinning;
+
+		// MGlobal::displayInfo(MString() +  fadeVal);
+
+		//curve_length -= curveFn.length()*fadeVal;
+
+
+		//if(curve_length <= 0)
+		//{
+		//	curve_length = 0.001;
+		//}
+
+		double length = (curveFn.length() / double(m_segments) );
+
+		// length *= rndAr[s];
+
+		for(int i=0; i < m_segments+1; i++)
+		{
 
 			MPoint p;
 
@@ -239,6 +289,9 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 			cross2.normalize();
 			currentNormal = cross2;
 
+
+			//p += MVector( 0.0, double(s)*3,0.0);
+
 			p += cross1 * m_zOffset;
 
 			double m[4][4] = {{tan.x, tan.y , tan.z, 0.0},
@@ -262,7 +315,7 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 		}
 
 
-
+		//}
 
 
 	}
@@ -433,65 +486,121 @@ MObject primitiveGenerator::generateStrips(){
 	num_verts = ( 2 * m_segments) + 2 ;
 	num_faces = m_segments;
 
+	num_verts *= m_numstrands;
+	num_faces *= m_numstrands;
 
 	// double angleRot = m_rotate / 180.0 * M_PI;
 
+	double r_x = 0.0;
+	double r_z = 0.0;
 
-
-
-	for (int i=0; i < m_segments+1; i++) 
+	for (int s=0; s < m_numstrands; s++) 
 	{
 
+		for (int i=0; i < m_segments+1; i++) 
+		{
 
-		double angleRot = m_rotate / 180.0 * M_PI;
-		angleRot += m_twist*i / double(m_segments);
 
-		MTransformationMatrix trM(trMatrixA[i]);
-		double scale[3] = {1.0,m_width,0.0};
-		trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-		trM.setScale(scale,MSpace::kObject);
+			double angleRot = m_rotate / 180.0 * M_PI;
+			angleRot += m_twist*i / double(m_segments);
 
-		double rad = m_r;
-		rad *= m_segmentsProfileA[i];
+			MTransformationMatrix trM(trMatrixA[i]);
+			double scale[3] = {1.0,m_width,0.0};
 
-		MPoint p1 = MPoint( 0.0, -rad, 0.0 );
-		MPoint p2 = MPoint( 0.0, rad, 0.0 );
 
-		pA.append(  MFloatPoint( p1 * trM.asMatrix()) );
-		pA.append(  MFloatPoint( p2 * trM.asMatrix()) );
 
+			//
+
+
+
+			double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+			double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+
+			trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+			trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
+
+			//
+
+
+			trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
+			trM.setScale(scale,MSpace::kObject);
+
+			double rad = m_r;
+			rad *= m_segmentsProfileA[i];
+
+
+
+
+
+			MPoint p1 = MPoint( 0.0, -rad, 0.0 );
+			MPoint p2 = MPoint( 0.0,  rad, 0.0 );
+
+
+
+			pA.append(  MFloatPoint( p1 * trM.asMatrix()) );
+			pA.append(  MFloatPoint( p2 * trM.asMatrix()) );
+
+		}
 	}
-
-//	int len = pA.length();
+	//	int len = pA.length();
 
 	// Facecounts CAPS
 	MIntArray faceCounts;
 	MIntArray faceConnects;
 
 
-	for (int i=0; i < m_segments; i++) {
 
-		faceCounts.append(4);
+	for (int s=0; s < m_numstrands; s++) 
+	{
+		for (int i=0; i < m_segments; i++) {
+
+			faceCounts.append(4);
+		}
 	}
 
 
-	int v00 = 0;
-	int v01 = 2;
-	int v02 = 3;
-	int v03 = 1;
 
-	for (int i=0; i < m_segments; i++) {
+	int connectA_count = 0;
 
-		faceConnects.append(v00);
-		faceConnects.append(v01);
-		faceConnects.append(v02);
-		faceConnects.append(v03);
-		v00 = v01;
-		v01 = v01 + 2;
-		v03 = v02;
-		v02 = v01 + 1;
+	int v00;
+	int v01;
+	int v02;
+	int v03;
+
+	for (int s=0; s < m_numstrands; s++) 
+	{
+
+		//MGlobal::displayInfo(MString() + connectA_count);
+
+		for (int i=0; i < m_segments; i++) 
+		{
+
+			v00 = (i*2);
+			v01 = (i*2)+2;
+			v02 = (i*2)+3;
+			v03 = (i*2)+1;
+
+			v00 += connectA_count;
+			v01 += connectA_count;
+			v02 += connectA_count;
+			v03 += connectA_count;
+
+
+			faceConnects.append(v00);
+			faceConnects.append(v01);
+			faceConnects.append(v02);
+			faceConnects.append(v03);
+
+		}
+
+		connectA_count += m_segments + (m_segments +2);
+
+
+
 	}
 
+
+	//MGlobal::displayInfo(MString() + "------");
 
 	// ------------------------------------------------------------------------------------------
 	// UV
@@ -515,28 +624,34 @@ MObject primitiveGenerator::generateStrips(){
 	}
 
 	double u = uv_height / double(m_segments);
-	double vh = 0.0;
+
 	double rotAxis = (m_uvRotate + 180.000)  * ( M_PI / 180.0 );
 
 	MPoint rotUVP;
 
-	for (int i=0; i<m_segments+1; i++) {
+	for (int s=0; s < m_numstrands; s++) 
+	{
 
-		float uO = uv_width + u_offset;
-		float vO = 0.0 + v_offset + vh;
+		double vh = 0.0;
 
-		rotUVP = rotate_point(uO,vO,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
-		uArray.append(rotUVP.x + m_uOffset);
-		vArray.append(rotUVP.y + m_vOffset);
+		for (int i=0; i<m_segments+1; i++) {
 
-		float u1 = 0.0 + u_offset;
-		float v1 = 0.0 + v_offset + vh;
+			float uO = uv_width + u_offset;
+			float vO = 0.0 + v_offset + vh;
 
-		rotUVP = rotate_point(u1,v1,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
-		uArray.append(rotUVP.x + m_uOffset);
-		vArray.append(rotUVP.y + m_vOffset);
+			rotUVP = rotate_point(uO,vO,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
+			uArray.append(rotUVP.x + m_uOffset);
+			vArray.append(rotUVP.y + m_vOffset);
 
-		vh+=u;
+			float u1 = 0.0 + u_offset;
+			float v1 = 0.0 + v_offset + vh;
+
+			rotUVP = rotate_point(u1,v1,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
+			uArray.append(rotUVP.x + m_uOffset);
+			vArray.append(rotUVP.y + m_vOffset);
+
+			vh+=u;
+		}
 	}
 
 	uvCounts = faceCounts;
@@ -578,6 +693,9 @@ MObject primitiveGenerator::generateTubes()
 
 	MMatrixArray trMatrixA = calculateMatrix();
 
+
+	// MGlobal::displayInfo(MString() + "---------");
+
 	// ------------------------------------------------------------------------------------------
 	//create verts
 	//
@@ -593,136 +711,237 @@ MObject primitiveGenerator::generateTubes()
 	double x,z;
 	double deg = 360.0 / double(m_sides);
 
-	for (int i=0; i < m_segments+1; i++) {
+	for (int s=0; s < m_numstrands; s++) 
+	{
 
+		for (int i=0; i < m_segments+1; i++) 
+		{
 
-		for (int j=0; j< m_sides; j++) {
+			for (int j=0; j< m_sides; j++) {
 
-			double angle = deg * j / 180.0  * M_PI;
-			double angleRot = m_rotate / 180.0 * M_PI;
-			angleRot += m_twist*i / double(m_segments);
+				double angle = deg * j / 180.0  * M_PI;
+				double angleRot = m_rotate / 180.0 * M_PI;
+				angleRot += m_twist*i / double(m_segments);
 
-			if (m_useProfile)
-			{
-				x = m_profilePointsA[j].x * m_r;
-				z = m_profilePointsA[j].z * m_r;
+				if (m_useProfile)
+				{
+					x = m_profilePointsA[j].x * m_r;
+					z = m_profilePointsA[j].z * m_r;
 
-				x *= m_segmentsProfileA[i];
-				z *= m_segmentsProfileA[i];
-
-				MPoint pnt( 0.0, x, z );
-				MTransformationMatrix trM;
-				trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-
-				double scale[3] = {1.0,m_width,m_height};
-				trM.setScale(scale,MSpace::kObject);
+					x *= m_segmentsProfileA[i];
+					z *= m_segmentsProfileA[i];
 
 
 
-				pnt *= trM.asRotateMatrix();
-				pnt *= trMatrixA[i];
-				
+					MPoint pnt( 0.0, x, z );
+					MTransformationMatrix trM;
+					
 
-				pA.append( MFloatPoint( pnt ) );
+					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+
+					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
+
+					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
+
+					double scale[3] = {1.0,m_width,m_height};
+					trM.setScale(scale,MSpace::kObject);
+
+
+
+					pnt *= trM.asRotateMatrix();
+
+					pnt *= trMatrixA[i];
+
+					pA.append( MFloatPoint( pnt ) );
+				}
+
+				if (!m_useProfile)
+				{
+
+					x  = cos( angle ) * m_r;
+					z  = sin( angle ) * m_r;
+
+
+					x *= m_segmentsProfileA[i];
+					z *= m_segmentsProfileA[i];
+
+
+
+					MPoint pnt( 0.0, x, z );
+
+					MTransformationMatrix trM(trMatrixA[i]);
+
+					double scale[3] = {1.0,m_width,m_height};
+					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
+
+
+
+					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+
+					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
+
+
+
+					trM.setScale(scale,MSpace::kObject);
+
+
+					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
+
+
+					pA.append( outP );
+				}
+
+
+
+				num_verts += 1;
 			}
 
-			if (!m_useProfile)
-			{
-
-				x  = cos( angle ) * m_r;
-				z  = sin( angle ) * m_r;
-
-
-				x *= m_segmentsProfileA[i];
-				z *= m_segmentsProfileA[i];
-
-				MPoint pnt( 0.0, x, z );
-
-				MTransformationMatrix trM(trMatrixA[i]);
-				double scale[3] = {1.0,m_width,m_height};
-				trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-				trM.setScale(scale,MSpace::kObject);
-
-
-				MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
-
-				pA.append( outP );
-			}
-
-
-
-			num_verts += 1;
 		}
-
 	}
 
 	// numFaces
-	int num_faces = m_sides * (m_segments) + 2;
-	if (!m_capTop){ num_faces = m_sides * (m_segments); }
 
+
+	int num_faces = m_sides * (m_segments);
+
+	if (m_capTop)
+	{ 
+		num_faces = m_sides * (m_segments) + 2;
+	}
+
+	num_faces *= m_numstrands;
 
 	// Facecounts CAPS
 	MIntArray faceCounts;
 
-	for (int i=0; i<m_segments; i++) 
+	for (int s=0; s < m_numstrands; s++) 
 	{
 
-		for (int j=0; j<m_sides; j++) 
+		if (m_capTop)
+		{ 
+			faceCounts.append(m_sides);
+		}
+
+		for (int i=0; i<m_segments; i++) 
 		{
-			faceCounts.append(4);
+
+			for (int j=0; j<m_sides; j++) 
+			{
+				faceCounts.append(4);
+			}
+
+		}
+
+
+		if (m_capTop)
+		{ 
+			faceCounts.append(m_sides);
 		}
 
 	}
 
-	if (m_capTop)
-	{ 
-		faceCounts.append(m_sides);
-		faceCounts.append(m_sides);
-	}
 
 
 
 	// Faceconnects SIDES
 	MIntArray faceConnects;
-	for (int j=0; j<m_segments; j++) 
+
+	int connectA_count = 0;
+	int connectA_frontcap_count = 0;
+	int connectA_backcap_count = 0;
+
+	for (int s=0; s < m_numstrands; s++) 
 	{
 
-		for (int i=0; i<m_sides; i++) 
+		// Cap front
+		if (m_capTop)
+		{ 
+			for (int i=0; i<m_sides; i++) 
+			{
+				faceConnects.append(i + connectA_frontcap_count);
+			}
+		}
+
+		for (int j=0; j<m_segments; j++) 
 		{
 
-			int v0 = m_sides * j + i;
-			int v1 = m_sides * (j+1) + i;
-			int v2 = m_sides * (j+1) + (i + 1);
-			int v3 = m_sides * (j) + (i + 1);
 
-			if (i == m_sides-1)
+
+			for (int i=0; i<m_sides; i++) 
 			{
-				v2 = m_sides * j + (i + 1);
-				v3 = m_sides * j;
+
+				int v0 = m_sides * j + i;
+				int v1 = m_sides * (j+1) + i;
+				int v2 = m_sides * (j+1) + (i + 1);
+				int v3 = m_sides * (j) + (i + 1);
+
+				if (i == m_sides-1)
+				{
+					v2 = m_sides * j + (i + 1);
+					v3 = m_sides * j;
+				}
+
+				v0 += connectA_count;
+				v1 += connectA_count;
+				v2 += connectA_count;
+				v3 += connectA_count;
+
+				faceConnects.append(v0);
+				faceConnects.append(v3);
+				faceConnects.append(v2);
+				faceConnects.append(v1);
+
 			}
 
-			faceConnects.append(v0);
-			faceConnects.append(v3);
-			faceConnects.append(v2);
-			faceConnects.append(v1);
 
 		}
+
+
+
+		// Cap back
+		if (m_capTop)
+		{ 
+			for (int i=0; i<m_sides; i++) 
+			{
+
+				faceConnects.append(i + connectA_backcap_count);
+			}
+		}
+
+
+
+		connectA_frontcap_count += (m_sides * m_segments) + (m_sides*s);
+		connectA_backcap_count += (m_sides * m_segments) + (m_sides*s) + m_sides;
+
+		connectA_count += (m_sides * m_segments)  + m_sides;
+
 	}
 
-	if (m_capTop)
-	{ 
+	//// Cap front
+	//if (m_capTop)
+	//{ 
 
-		for (int i=0; i<m_sides; i++) {
+	//	// Cap front
+	//	if (m_capTop)
+	//	{ 
+	//		for (int i=m_sides-1; i > -1 ; i--) 
+	//		{
+	//			faceConnects.append(i + ((m_segments*m_sides)*numStrands+1));
+	//		}
+	//	}
 
-			int f = ((m_segments) * m_sides) + i;
-			faceConnects.append(f);
-		}
+	//	for (int i=0; i<m_sides; i++) 
+	//	{
 
-		for (int i=m_sides-1; i > -1 ; i--) {
+	//		faceConnects.append(i + ((m_segments*m_sides)*numStrands+1) + m_sides);
+	//	}
+	//}
 
-			faceConnects.append(i);
-		}
-	}
+
 
 	// ------------------------------------------------------------------------------------------
 	// UV
@@ -735,152 +954,218 @@ MObject primitiveGenerator::generateTubes()
 	int v1,v2,v3,v4,lastUV;
 	int counter = m_sides;
 
-	for (int j=0; j<m_segments; j++) {
+	int uv_id_count = 0;
+	int uv_id_frontcap_count = 0;
+	int uv_id_backcap_count = 0;
 
-		for (int i=0; i<m_sides; i++) {
+	for (int s=0; s < m_numstrands; s++) 
+	{
 
-			v1 = i + 0 + counter;
-			v2 = i + 1 + counter;
-			v3 = i + 2 + m_sides + counter;
-			v4 = i + 1 + m_sides + counter;
+		// Top cap
+		if (m_capTop)
+		{ 
 
-			uvIds.append(v1);
-			uvIds.append(v2);
-			uvIds.append(v3);
-			uvIds.append(v4);
+			for (int i=0; i<m_sides; i++) 
+			{
+				/*uvIds.append(i + uv_id_frontcap_count);*/
 
-			lastUV = v4 + m_sides;
+				//i+= uv_id_count;
+
+				uvIds.append(i);
+			}
+
 		}
 
-		counter +=m_sides+1;
+
+
+		for (int j=0; j<m_segments; j++) 
+		{
+
+			for (int i=0; i<m_sides; i++) {
+
+				v1 = i + 0 + counter;
+				v2 = i + 1 + counter;
+				v3 = i + 2 + m_sides + counter;
+				v4 = i + 1 + m_sides + counter;
+
+				//v1 += uv_id_count;
+				//v2 += uv_id_count;
+				//v3 += uv_id_count;
+				//v4 += uv_id_count;
+
+				uvIds.append(v1);
+				uvIds.append(v2);
+				uvIds.append(v3);
+				uvIds.append(v4);
+
+				lastUV = v4 + m_sides;
+			}
+
+			counter += m_sides+1;
+		}
+
+		// lastUV += (m_sides * m_segments);
+
+		// Bottom cap
+		if (m_capTop)
+		{ 
+
+			uvIds.append(lastUV+1);
+			for ( int i = lastUV+1-m_sides+1; i<lastUV+1; i++) {
+				/*uvIds.append(i + uv_id_backcap_count);*/
+
+				//i+= uv_id_count;
+
+				uvIds.append(i);
+			}
+
+		}
+
+
+
+
+
+		uv_id_frontcap_count += (m_sides * m_segments) + (m_sides*s);
+		uv_id_backcap_count += (m_sides * m_segments) + (m_sides*s) + m_sides;
+
+		// counter += (m_sides * m_segments) *s;
+		// counter = 0;
 	}
 
 	counter = 0;
 
-	if (m_capTop)
-	{ 
 
-		for (int i=0; i<m_sides; i++) {
-			uvIds.append(i);
-		}
-
-		uvIds.append(lastUV+1);
-		for ( int i = lastUV+1-m_sides+1; i<lastUV+1; i++) {
-			uvIds.append(i);
-		}
-	}
 
 	// - UV uvCounts
+	for (int s=0; s < m_numstrands; s++) 
+	{
 
-	for (int i=0; i< m_sides * m_segments; i++) {
+		if (m_capTop)
+		{ 
+			uvCounts.append(m_sides);
+		}
 
-		uvCounts.append(4);
+		for (int i=0; i< m_sides * m_segments; i++) {
+
+			uvCounts.append(4);
+		}
+
+		if (m_capTop)
+		{ 
+			uvCounts.append(m_sides);
+		}
 	}
-
-	if (m_capTop)
-	{ 
-		uvCounts.append(m_sides);
-		uvCounts.append(m_sides);
-	}
-
-	// - UV array
 
 	double u,v;
-
 	double angle;
 
-	for (int i=0; i<m_sides; i++) {
+	// - UV array
+	if (m_capTop)
+	{ 
 
-		double deg = 360.0 / double(m_sides);
+		for (int s=0; s < m_numstrands; s++) 
+		{
+			for (int i=0; i<m_sides; i++) 
+			{
 
-		if ( i != 0) {
-			angle = deg * double(i) / 180.0  * M_PI;
+				double deg = 360.0 / double(m_sides);
+
+				if ( i != 0) {
+					angle = deg * double(i) / 180.0  * M_PI;
+				}
+
+				else {
+					angle = 0.0;
+				}
+				double angleRot = m_rotate / 180.0 * M_PI;
+
+				//angleRot += twist*i / segments;
+
+				u = cos( angle ) * m_capUVsize;
+				v = sin( angle ) * m_capUVsize;
+
+				if (!m_useProfile)
+				{
+
+					u  = cos( angle + angleRot ) * m_capUVsize;
+					v  = sin( angle + angleRot ) * m_capUVsize;
+				}
+
+
+				if (m_useProfile)
+				{ 
+
+					u = m_profilePointsA[i].x * m_capUVsize;
+					v = m_profilePointsA[i].z * m_capUVsize;
+
+
+				}
+
+
+				uArray.append(u + m_uOffsetCap);
+				vArray.append(v + m_vOffsetCap);
+
+			}
 		}
-
-		else {
-			angle = 0.0;
-		}
-		double angleRot = m_rotate / 180.0 * M_PI;
-
-		//angleRot += twist*i / segments;
-
-		u = cos( angle ) * m_capUVsize;
-		v = sin( angle ) * m_capUVsize;
-
-		if (!m_useProfile){
-
-			u  = cos( angle + angleRot ) * m_capUVsize;
-			v  = sin( angle + angleRot ) * m_capUVsize;
-		}
-
-
-		if (m_useProfile)
-		{ 
-
-			u = m_profilePointsA[i].x * m_capUVsize;
-			v = m_profilePointsA[i].z * m_capUVsize;
-
-
-		}
-
-
-		uArray.append(u + m_uOffsetCap);
-		vArray.append(v + m_vOffsetCap);
-
 	}
 
 
-	for (int i=0; i < m_segments + 1; i++) {
+	for (int s=0; s < m_numstrands; s++) 
+	{
+		for (int i=0; i < m_segments + 1; i++) {
 
-		for (int j=0; j < m_sides +1; j++) {
-			u = double(j) / (m_sides * (1.0 / m_uWidth));
-			v = double(i) / (m_segments * (1.0 / m_vWidth));
+			for (int j=0; j < m_sides +1; j++) {
+				u = double(j) / (m_sides * (1.0 / m_uWidth));
+				v = double(i) / (m_segments * (1.0 / m_vWidth));
 
-			double uO = u + m_uOffset;
-			double vO = v + m_vOffset;
+				double uO = u + m_uOffset;
+				double vO = v + m_vOffset;
 
-			double rotAxis = (m_uvRotate + 180.000)  * ( M_PI / 180.0 );
+				double rotAxis = (m_uvRotate + 180.000)  * ( M_PI / 180.0 );
 
-			MPoint rotUVP = rotate_point(uO,vO,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
+				MPoint rotUVP = rotate_point(uO,vO,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
 
-			/*uArray.append(u + uOffset);
-			vArray.append(v + vOffset);*/
+				/*uArray.append(u + uOffset);
+				vArray.append(v + vOffset);*/
 
-			uArray.append(rotUVP.x + m_uOffset);
-			vArray.append(rotUVP.y + m_vOffset);
+				uArray.append(rotUVP.x + m_uOffset);
+				vArray.append(rotUVP.y + m_vOffset);
 
+			}
 		}
 	}
 
 	if (m_capTop)
 	{ 
+		for (int s=0; s < m_numstrands; s++) 
+		{
+			for (int i=0; i<m_sides; i++) {
 
-		for (int i=0; i<m_sides; i++) {
+				double deg = 360.0 / double(m_sides);
 
-			double deg = 360.0 / double(m_sides);
+				double angle = deg * double(i) / 180.0  * M_PI;
+				double angleRot = m_rotate / 180.0 * M_PI;
 
-			double angle = deg * double(i) / 180.0  * M_PI;
-			double angleRot = m_rotate / 180.0 * M_PI;
+				if (!m_useProfile){
 
-			if (!m_useProfile){
+					u  = cos( angle + angleRot ) * m_capUVsize;
+					v  = sin( angle + angleRot ) * m_capUVsize;
 
-				u  = cos( angle + angleRot ) * m_capUVsize;
-				v  = sin( angle + angleRot ) * m_capUVsize;
+				}
 
+
+				if (m_useProfile)
+				{ 
+
+					u = m_profilePointsA[i].x * m_capUVsize;
+					v = m_profilePointsA[i].z * m_capUVsize;
+				}
+
+				u += m_capUVsize*2.0;
+
+				uArray.append(u + m_uOffsetCap);
+				vArray.append(v + m_vOffsetCap);
 			}
-
-
-			if (m_useProfile)
-			{ 
-
-				u = m_profilePointsA[i].x * m_capUVsize;
-				v = m_profilePointsA[i].z * m_capUVsize;
-			}
-
-			u += m_capUVsize*2.0;
-
-			uArray.append(u + m_uOffsetCap);
-			vArray.append(v + m_vOffsetCap);
 		}
 	}
 
@@ -890,7 +1175,7 @@ MObject primitiveGenerator::generateTubes()
 	MFnMeshData meshDataFn;
 	MObject newMeshData = meshDataFn.create();
 	MFnMesh meshFn;
-	meshFn.create( num_verts, num_faces, pA, faceCounts, faceConnects, uArray,vArray, newMeshData, &status );
+	meshFn.create( num_verts, num_faces, pA, faceCounts, faceConnects, uArray, vArray, newMeshData, &status );
 	CHECK_MSTATUS( status );
 	status = meshFn.assignUVs(uvCounts,uvIds);
 	CHECK_MSTATUS( status );
@@ -972,7 +1257,7 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	MPlug p_refcurve( this->thisMObject(), aRefCurve );
 	MPlug p_inLocA( this->thisMObject(), aInLocAPos );
 	MPlug p_inLocB( this->thisMObject(), aInLocBPos );
-	
+
 
 	if ( plug != aOutMesh)
 	{
@@ -985,11 +1270,11 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	MDataHandle hRefCurve = data.inputValue(aRefCurve, &status);
 	CHECK_MSTATUS_AND_RETURN_IT( status );
 
-//	MDataHandle hInLocA = data.inputValue(aInLocAPos, &status);
-//	CHECK_MSTATUS_AND_RETURN_IT( status );
-//
-//	MDataHandle hInLocB = data.inputValue(aInLocBPos, &status);
-//	CHECK_MSTATUS_AND_RETURN_IT( status );
+	//	MDataHandle hInLocA = data.inputValue(aInLocAPos, &status);
+	//	CHECK_MSTATUS_AND_RETURN_IT( status );
+	//
+	//	MDataHandle hInLocB = data.inputValue(aInLocBPos, &status);
+	//	CHECK_MSTATUS_AND_RETURN_IT( status );
 
 	MDataHandle hOutput = data.outputValue( aOutMesh, &status );
 	CHECK_MSTATUS_AND_RETURN_IT( status );
@@ -1011,11 +1296,17 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_zOffset				= data.inputValue( aCurveZOffset, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandOffset			= data.inputValue( aStrandOffset, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandThinning		= data.inputValue( aStrandThinning, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_sides					= data.inputValue( aSides, &status ).asInt();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_segmentsLoop			= data.inputValue( aSegmentsLoop, &status ).asInt();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_segments				= data.inputValue( aSegments, &status ).asInt();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_numstrands			= data.inputValue( aNumstrands, &status ).asInt();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_autoSegRes			= data.inputValue( aAutoSegmentsRes, &status).asInt();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -1088,7 +1379,7 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	MMatrix m_inLocA_posM   = data.inputValue( aInLocAPos ).asMatrix();
 	MMatrix m_inLocB_posM   = data.inputValue( aInLocBPos ).asMatrix();
 
-	
+
 
 	MTransformationMatrix m_inLocA_posMat(m_inLocA_posM);
 	m_inLocA_pos = m_inLocA_posMat.getTranslation(MSpace::kWorld);
@@ -1142,6 +1433,10 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_segmentsProfileA = storeProfileCurveData(a_segmentsAttribute, m_segments, m_segmentsLoop);
 
+	// Ramp attribute
+	MRampAttribute a_strandsOffsetAttribute(this->thisMObject(), aStrandOffsetRamp, &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandOffsetProfileA = storeProfileCurveData(a_strandsOffsetAttribute, m_segments, m_segmentsLoop);
 
 	//
 	m_profilePointsA.clear();
@@ -1347,6 +1642,15 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aSegments );
 
+	primitiveGenerator::aNumstrands = nAttr.create( "strands", "strands", MFnNumericData::kInt );
+	nAttr.setDefault( 4 );
+	nAttr.setMin(1);
+	nAttr.setSoftMax(50);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aNumstrands );
+
 	primitiveGenerator::aSegmentsLoop = nAttr.create( "segmentsLoop", "segmentsLoop", MFnNumericData::kInt );
 	nAttr.setDefault( 1 );
 	nAttr.setMin( 1 );
@@ -1355,6 +1659,9 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aSegmentsLoop );
+
+	primitiveGenerator::aStrandOffsetRamp = rAttr.createCurveRamp("strandOffsetRamp", "strandOffsetRamp");
+	addAttribute(aStrandOffsetRamp);
 
 	primitiveGenerator::aSegmentRamp = rAttr.createCurveRamp("segmentsRamp", "segmentsRamp");
 	addAttribute(aSegmentRamp);
@@ -1409,6 +1716,24 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aAutoSegmentsRes );
+
+	primitiveGenerator::aStrandOffset = nAttr.create( "strandOffset", "strandOffset", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setSoftMin(0.0);
+	nAttr.setSoftMax(1.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandOffset );
+
+	primitiveGenerator::aStrandThinning = nAttr.create( "strandThinning", "strandThinning", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setMin(0.0);
+	nAttr.setMax(1.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandThinning );
 
 	primitiveGenerator::aCurveZOffset = nAttr.create( "curveZOffset", "curveZOffset", MFnNumericData::kDouble );
 	nAttr.setDefault( 0.0 );
@@ -1612,6 +1937,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aSides, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegmentsLoop, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegments, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aNumstrands, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aUseInputCurve, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSmoothNormals, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aCapTop, primitiveGenerator::aOutMesh);
@@ -1627,7 +1953,10 @@ MStatus primitiveGenerator::initialize()
 
 	attributeAffects(primitiveGenerator::aFirstUpVec, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aCurveZOffset, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandOffset, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandThinning, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegmentRamp, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandOffsetRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aProfilePresets, primitiveGenerator::aOutMesh);
 
 	// Override

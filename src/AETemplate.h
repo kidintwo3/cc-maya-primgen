@@ -39,7 +39,13 @@ MString mel_AETemplate()
 		"		editorTemplate -addSeparator;\r\n"
 		"		editorTemplate -label \"Auto segments\" -addControl \"autoSegments\";\r\n"
 		"		editorTemplate -label \"Segments at knots only\" -addControl \"autoSegmentsKnotsOnly\";\r\n"
-		"		\r\n"
+		"    editorTemplate -endLayout;\r\n"
+		"	\r\n"
+		"	editorTemplate -beginLayout \"Strands\" -collapse 0;\r\n"
+		"		editorTemplate -label \"Strands\" -addControl \"strands\";\r\n"
+		"		editorTemplate -label \"Strand Offset\" -addControl \"strandOffset\";\r\n"
+		"		editorTemplate -label \"Strand Thinning\" -addControl \"strandThinning\";\r\n"
+		"		AEaddRampControl( $nodeName + \".strandOffsetRamp\" );\r\n"
 		"    editorTemplate -endLayout;\r\n"
 		"	\r\n"
 		"	editorTemplate -beginLayout \"Segments Translation\" -collapse 0;\r\n"
@@ -253,7 +259,6 @@ MString mel_AETemplate()
 		"    }\r\n"
 		"    \r\n"
 		"}\r\n";
-
 
 	return s_aeTemplate;
 

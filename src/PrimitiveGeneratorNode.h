@@ -56,6 +56,8 @@
 #include <math.h>
 #include <iostream>
 #include <string>
+#include <ctime>
+#include <cstdlib>
 //#include <random>
 
 
@@ -103,6 +105,8 @@ public:
 	static MObject      aSegments;
 	static MObject		aSegmentsLoop;
 
+	static MObject      aNumstrands;
+
 	static MObject      aUseInputCurve;
 	static MObject      aSmoothNormals;
 	static MObject      aCapTop;
@@ -117,6 +121,9 @@ public:
 
 	static MObject      aCurveZOffset;
 
+	static MObject      aStrandOffset;
+	static MObject      aStrandThinning;
+
 	static MObject      aInLocAPos;
 	static MObject      aInLocBPos;
 
@@ -127,6 +134,7 @@ public:
 
 
 	static MObject		aSegmentRamp;
+	static MObject		aStrandOffsetRamp;
 
 
 	// UV
@@ -154,9 +162,9 @@ public:
 
 private:
 
-	double				m_r, m_width, m_height,  m_rotate, m_twist, m_zOffset;
+	double				m_r, m_width, m_height,  m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandThinning;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
-	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type;
+	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop;
 	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector;
 	short				m_profilePreset;
 	MVector				m_firstUpVec;
@@ -167,6 +175,7 @@ private:
 
 	MPointArray			m_profilePointsA;
 	MFloatArray			m_segmentsProfileA;
+	MFloatArray			m_strandOffsetProfileA;
 
 	MPoint				m_inLocA_pos;
 	MPoint				m_inLocB_pos;

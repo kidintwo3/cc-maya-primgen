@@ -23,7 +23,13 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 		editorTemplate -addSeparator;
 		editorTemplate -label "Auto segments" -addControl "autoSegments";
 		editorTemplate -label "Segments at knots only" -addControl "autoSegmentsKnotsOnly";
-		
+    editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Strands" -collapse 0;
+		editorTemplate -label "Strands" -addControl "strands";
+		editorTemplate -label "Strand Offset" -addControl "strandOffset";
+		editorTemplate -label "Strand Thinning" -addControl "strandThinning";
+		AEaddRampControl( $nodeName + ".strandOffsetRamp" );
     editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Segments Translation" -collapse 0;
