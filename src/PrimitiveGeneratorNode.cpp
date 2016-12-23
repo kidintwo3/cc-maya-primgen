@@ -735,7 +735,7 @@ MObject primitiveGenerator::generateTubes()
 
 					MPoint pnt( 0.0, x, z );
 					MTransformationMatrix trM;
-					
+
 
 					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
 					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
@@ -851,8 +851,6 @@ MObject primitiveGenerator::generateTubes()
 	MIntArray faceConnects;
 
 	int connectA_count = 0;
-	int connectA_frontcap_count = 0;
-	int connectA_backcap_count = 0;
 
 	for (int s=0; s < m_numstrands; s++) 
 	{
@@ -860,10 +858,12 @@ MObject primitiveGenerator::generateTubes()
 		// Cap front
 		if (m_capTop)
 		{ 
-			for (int i=0; i<m_sides; i++) 
+
+			for (int i =m_sides; i --> 0; )
 			{
-				faceConnects.append(i + connectA_frontcap_count);
+				faceConnects.append(i + connectA_count);
 			}
+
 		}
 
 		for (int j=0; j<m_segments; j++) 
@@ -908,38 +908,14 @@ MObject primitiveGenerator::generateTubes()
 			for (int i=0; i<m_sides; i++) 
 			{
 
-				faceConnects.append(i + connectA_backcap_count);
+				faceConnects.append(i + connectA_count +(m_sides * m_segments));
 			}
 		}
 
 
-
-		connectA_frontcap_count += (m_sides * m_segments) + (m_sides*s);
-		connectA_backcap_count += (m_sides * m_segments) + (m_sides*s) + m_sides;
-
 		connectA_count += (m_sides * m_segments)  + m_sides;
 
 	}
-
-	//// Cap front
-	//if (m_capTop)
-	//{ 
-
-	//	// Cap front
-	//	if (m_capTop)
-	//	{ 
-	//		for (int i=m_sides-1; i > -1 ; i--) 
-	//		{
-	//			faceConnects.append(i + ((m_segments*m_sides)*numStrands+1));
-	//		}
-	//	}
-
-	//	for (int i=0; i<m_sides; i++) 
-	//	{
-
-	//		faceConnects.append(i + ((m_segments*m_sides)*numStrands+1) + m_sides);
-	//	}
-	//}
 
 
 
@@ -952,7 +928,7 @@ MObject primitiveGenerator::generateTubes()
 	MFloatArray         vArray;
 
 	int v1,v2,v3,v4,lastUV;
-	int counter = m_sides;
+	int counter = 0;
 
 	int uv_id_count = 0;
 	int uv_id_frontcap_count = 0;
@@ -967,14 +943,13 @@ MObject primitiveGenerator::generateTubes()
 
 			for (int i=0; i<m_sides; i++) 
 			{
-				/*uvIds.append(i + uv_id_frontcap_count);*/
-
-				//i+= uv_id_count;
-
-				uvIds.append(i);
+				uvIds.append(i + counter);
 			}
 
+			counter += m_sides;
 		}
+
+
 
 
 
@@ -988,48 +963,33 @@ MObject primitiveGenerator::generateTubes()
 				v3 = i + 2 + m_sides + counter;
 				v4 = i + 1 + m_sides + counter;
 
-				//v1 += uv_id_count;
-				//v2 += uv_id_count;
-				//v3 += uv_id_count;
-				//v4 += uv_id_count;
 
 				uvIds.append(v1);
 				uvIds.append(v2);
 				uvIds.append(v3);
 				uvIds.append(v4);
 
-				lastUV = v4 + m_sides;
 			}
 
 			counter += m_sides+1;
 		}
 
-		// lastUV += (m_sides * m_segments);
 
-		// Bottom cap
+
+		// Top cap
 		if (m_capTop)
 		{ 
 
-			uvIds.append(lastUV+1);
-			for ( int i = lastUV+1-m_sides+1; i<lastUV+1; i++) {
-				/*uvIds.append(i + uv_id_backcap_count);*/
+			for (int i=0; i<m_sides; i++) 
+			{
 
-				//i+= uv_id_count;
-
-				uvIds.append(i);
+				uvIds.append(i + counter);
 			}
 
+			counter += m_sides;
 		}
 
-
-
-
-
-		uv_id_frontcap_count += (m_sides * m_segments) + (m_sides*s);
-		uv_id_backcap_count += (m_sides * m_segments) + (m_sides*s) + m_sides;
-
-		// counter += (m_sides * m_segments) *s;
-		// counter = 0;
+		counter += m_sides+1;
 	}
 
 	counter = 0;
@@ -1059,12 +1019,16 @@ MObject primitiveGenerator::generateTubes()
 	double u,v;
 	double angle;
 
-	// - UV array
-	if (m_capTop)
-	{ 
+	// - UV array Position
 
-		for (int s=0; s < m_numstrands; s++) 
-		{
+
+
+	for (int s=0; s < m_numstrands; s++) 
+	{
+
+		if (m_capTop)
+		{ 
+
 			for (int i=0; i<m_sides; i++) 
 			{
 
@@ -1078,8 +1042,6 @@ MObject primitiveGenerator::generateTubes()
 					angle = 0.0;
 				}
 				double angleRot = m_rotate / 180.0 * M_PI;
-
-				//angleRot += twist*i / segments;
 
 				u = cos( angle ) * m_capUVsize;
 				v = sin( angle ) * m_capUVsize;
@@ -1102,43 +1064,38 @@ MObject primitiveGenerator::generateTubes()
 				}
 
 
-				uArray.append(u + m_uOffsetCap);
+				uArray.append(u + m_uOffsetCap + (s*2));
 				vArray.append(v + m_vOffsetCap);
 
 			}
+
 		}
-	}
 
 
-	for (int s=0; s < m_numstrands; s++) 
-	{
 		for (int i=0; i < m_segments + 1; i++) {
 
 			for (int j=0; j < m_sides +1; j++) {
 				u = double(j) / (m_sides * (1.0 / m_uWidth));
 				v = double(i) / (m_segments * (1.0 / m_vWidth));
 
-				double uO = u + m_uOffset;
+				double uO = u + m_uOffset + s * 2;
 				double vO = v + m_vOffset;
 
 				double rotAxis = (m_uvRotate + 180.000)  * ( M_PI / 180.0 );
 
 				MPoint rotUVP = rotate_point(uO,vO,rotAxis, MPoint(m_uOffset,m_vOffset,0.0));
 
-				/*uArray.append(u + uOffset);
-				vArray.append(v + vOffset);*/
 
 				uArray.append(rotUVP.x + m_uOffset);
 				vArray.append(rotUVP.y + m_vOffset);
 
 			}
 		}
-	}
 
-	if (m_capTop)
-	{ 
-		for (int s=0; s < m_numstrands; s++) 
-		{
+
+		if (m_capTop)
+		{ 
+
 			for (int i=0; i<m_sides; i++) {
 
 				double deg = 360.0 / double(m_sides);
@@ -1163,11 +1120,15 @@ MObject primitiveGenerator::generateTubes()
 
 				u += m_capUVsize*2.0;
 
-				uArray.append(u + m_uOffsetCap);
+				uArray.append(u + m_uOffsetCap + (s*2));
 				vArray.append(v + m_vOffsetCap);
 			}
+
 		}
+
 	}
+
+
 
 	// ------------------------------------------------------------------------------------------
 	// Create mesh
@@ -1643,7 +1604,7 @@ MStatus primitiveGenerator::initialize()
 	addAttribute( primitiveGenerator::aSegments );
 
 	primitiveGenerator::aNumstrands = nAttr.create( "strands", "strands", MFnNumericData::kInt );
-	nAttr.setDefault( 4 );
+	nAttr.setDefault(1);
 	nAttr.setMin(1);
 	nAttr.setSoftMax(50);
 	nAttr.setKeyable( true );
