@@ -169,12 +169,14 @@ MFloatArray primitiveGenerator::storeProfileCurveData(MRampAttribute a_segmentsA
 
 
 
-MMatrixArray primitiveGenerator::calculateMatrix()
+std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 {
 
 
 	MStatus status;
 	MMatrixArray trMatrixA;
+
+	std::vector<MMatrixArray> trMatrixA_vec;
 
 	// Spline
 	if (m_type == 0)
@@ -234,88 +236,75 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 
 		// If full spline
 
-		//for (int s=0; s < m_numstrands; s++) 
-		//{
-
-		//double curve_length = curveFn.length();
-		//double fadeVal = rndAr[s] * m_strandThinning;
-
-		// MGlobal::displayInfo(MString() +  fadeVal);
-
-		//curve_length -= curveFn.length()*fadeVal;
-
-
-		//if(curve_length <= 0)
-		//{
-		//	curve_length = 0.001;
-		//}
-
-		double length = (curveFn.length() / double(m_segments) );
-
-		// length *= rndAr[s];
-
-		for(int i=0; i < m_segments+1; i++)
+		for (int s=0; s < m_numstrands; s++) 
 		{
 
-			MPoint p;
 
-			double param = curveFn.findParamFromLength( double(i) * length );
-			curveFn.getPointAtParam(param, p, MSpace::kWorld );
 
-			if (m_segOnlyKnots)
+			double length = (curveFn.length() / double(m_segments) );
+
+			length *= 1.0 - m_strandThinning;
+
+			for(int i=0; i < m_segments+1; i++)
 			{
-				curveFn.getParamAtPoint(cvA[i], param, 1.0, MSpace::kWorld);
-				p = cvA[i];
+
+				MPoint p;
+
+				double param = curveFn.findParamFromLength( double(i) * length );
+				curveFn.getPointAtParam(param, p, MSpace::kWorld );
+
+				if (m_segOnlyKnots)
+				{
+					curveFn.getParamAtPoint(cvA[i], param, 1.0, MSpace::kWorld);
+					p = cvA[i];
+				}
+
+
+
+				MVector tan = curveFn.tangent(param , MSpace::kWorld);
+				tan.normalize();
+
+				MVector cross1 = currentNormal^tan;
+				cross1.normalize() ;
+
+
+
+				MVector cross2 =  tan^cross1;
+
+				if(m_alingToUpVector)
+				{
+					cross2 = m_firstUpVec;
+				}
+
+
+				cross2.normalize();
+				currentNormal = cross2;
+
+
+				//p += MVector( 0.0, double(s)*3,0.0);
+
+				p += cross1 * m_zOffset;
+
+				double m[4][4] = {{tan.x, tan.y , tan.z, 0.0},
+				{ cross1.x, cross1.y , cross1.z, 0.0},
+				{cross2.x, cross2.y , cross2.z, 0.0},
+				{p.x, p.y, p.z, 1.0}};
+
+
+
+				rotMatrix = m;
+
+				pA.append( p );
+
+				// put everything back
+				trMatrixA.append(rotMatrix);
+
 			}
 
 
-
-			MVector tan = curveFn.tangent(param , MSpace::kWorld);
-			tan.normalize();
-
-			MVector cross1 = currentNormal^tan;
-			cross1.normalize() ;
-
-
-
-			MVector cross2 =  tan^cross1;
-
-			if(m_alingToUpVector)
-			{
-				cross2 = m_firstUpVec;
-			}
-
-
-			cross2.normalize();
-			currentNormal = cross2;
-
-
-			//p += MVector( 0.0, double(s)*3,0.0);
-
-			p += cross1 * m_zOffset;
-
-			double m[4][4] = {{tan.x, tan.y , tan.z, 0.0},
-			{ cross1.x, cross1.y , cross1.z, 0.0},
-			{cross2.x, cross2.y , cross2.z, 0.0},
-			{p.x, p.y, p.z, 1.0}};
-
-
-
-			rotMatrix = m;
-
-			//rotMatrix += m_curveMatrix;
-			//p *= m_curveMatrix;
-
-			pA.append( p );
-
-			// put everything back
-
-			trMatrixA.append(rotMatrix);
+			trMatrixA_vec.push_back(trMatrixA);
 
 		}
-
-
-		//}
 
 
 	}
@@ -412,9 +401,12 @@ MMatrixArray primitiveGenerator::calculateMatrix()
 			}
 
 		}
+
+		trMatrixA_vec.push_back(trMatrixA);
+
 	}
 
-	return trMatrixA;
+	return trMatrixA_vec;
 
 }
 
@@ -474,7 +466,7 @@ MStatus primitiveGenerator::jiggle_calculate(MFloatVector goal)
 MObject primitiveGenerator::generateStrips(){
 
 	MStatus status;
-	MMatrixArray trMatrixA = calculateMatrix();
+	std::vector<MMatrixArray> trMatrixA = calculateMatrix();
 
 	MDoubleArray profile;
 
@@ -504,7 +496,7 @@ MObject primitiveGenerator::generateStrips(){
 			double angleRot = m_rotate / 180.0 * M_PI;
 			angleRot += m_twist*i / double(m_segments);
 
-			MTransformationMatrix trM(trMatrixA[i]);
+			MTransformationMatrix trM(trMatrixA[s][i]);
 			double scale[3] = {1.0,m_width,0.0};
 
 
@@ -691,7 +683,7 @@ MObject primitiveGenerator::generateTubes()
 
 	MStatus status;
 
-	MMatrixArray trMatrixA = calculateMatrix();
+	std::vector<MMatrixArray> trMatrixA = calculateMatrix();
 
 
 	// MGlobal::displayInfo(MString() + "---------");
@@ -732,29 +724,22 @@ MObject primitiveGenerator::generateTubes()
 					z *= m_segmentsProfileA[i];
 
 
-
 					MPoint pnt( 0.0, x, z );
-					MTransformationMatrix trM;
+					MTransformationMatrix trM(trMatrixA[s][i]);
 
-
+					double scale[3] = {1.0,m_width,m_height};
 					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
 					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
 
-					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-
+					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-
-					double scale[3] = {1.0,m_width,m_height};
 					trM.setScale(scale,MSpace::kObject);
 
 
+					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
+					pA.append(outP );
 
-					pnt *= trM.asRotateMatrix();
-
-					pnt *= trMatrixA[i];
-
-					pA.append( MFloatPoint( pnt ) );
 				}
 
 				if (!m_useProfile)
@@ -768,31 +753,22 @@ MObject primitiveGenerator::generateTubes()
 					z *= m_segmentsProfileA[i];
 
 
-
 					MPoint pnt( 0.0, x, z );
-
-					MTransformationMatrix trM(trMatrixA[i]);
+					MTransformationMatrix trM(trMatrixA[s][i]);
 
 					double scale[3] = {1.0,m_width,m_height};
-					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-
-
-
 					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
 					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
 
+					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-
-
-
 					trM.setScale(scale,MSpace::kObject);
 
 
 					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
-
-
 					pA.append( outP );
+
 				}
 
 
@@ -1064,7 +1040,7 @@ MObject primitiveGenerator::generateTubes()
 				}
 
 
-				uArray.append(u + m_uOffsetCap + (s*2));
+				uArray.append(u + m_uOffsetCap);
 				vArray.append(v + m_vOffsetCap);
 
 			}
@@ -1078,7 +1054,7 @@ MObject primitiveGenerator::generateTubes()
 				u = double(j) / (m_sides * (1.0 / m_uWidth));
 				v = double(i) / (m_segments * (1.0 / m_vWidth));
 
-				double uO = u + m_uOffset + s * 2;
+				double uO = u + m_uOffset;
 				double vO = v + m_vOffset;
 
 				double rotAxis = (m_uvRotate + 180.000)  * ( M_PI / 180.0 );
@@ -1120,7 +1096,7 @@ MObject primitiveGenerator::generateTubes()
 
 				u += m_capUVsize*2.0;
 
-				uArray.append(u + m_uOffsetCap + (s*2));
+				uArray.append(u + m_uOffsetCap);
 				vArray.append(v + m_vOffsetCap);
 			}
 

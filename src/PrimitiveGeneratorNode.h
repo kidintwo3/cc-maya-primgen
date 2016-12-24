@@ -58,7 +58,7 @@
 #include <string>
 #include <ctime>
 #include <cstdlib>
-//#include <random>
+#include <vector>
 
 
 
@@ -80,7 +80,7 @@ public:
 	MObject		        generateTubes();
 	MObject             generateStrips();
 	MPoint				rotate_point(float cx,float cy,float angle, MPoint p);
-	MMatrixArray		calculateMatrix();
+	std::vector<MMatrixArray>		calculateMatrix();
 	MFloatArray			storeProfileCurveData(MRampAttribute a_segmentsAttribute, int segments, int segmentsLoop);
 	
 	MStatus				jiggle_calculate(MFloatVector goal);
@@ -200,6 +200,8 @@ private:
 	MFloatVector		m_jiggleVector;
 
 	MCallbackIdArray	m_callbackIDs;
+
+	std::vector<MMatrixArray> trMatrixA_vec;
 
 };
 
