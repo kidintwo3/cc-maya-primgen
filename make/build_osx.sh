@@ -1,8 +1,8 @@
-versions=('2015' '2016' '2016.5' '2017')
+versions=('2014' '2015' '2016' '2016.5' '2017')
 op_system='mac'
-plugin_name='baseLoc'
-make_dir='/Users/hunyadijanos/Documents/GIT/cc-maya-base_locator/make/build/'$op_system'/'
-destination_dir='/Users/hunyadijanos/Documents/GIT/cc-maya-base_locator/build/'$op_system'/'
+plugin_name='primGen'
+make_dir='/Users/hunyadijanos/Documents/GIT/cc-maya-primgen/make/build/'$op_system'/'
+destination_dir='/Users/hunyadijanos/Documents/GIT/cc-maya-primgen/build/'$op_system'/'
 
 
 for i in "${versions[@]}"

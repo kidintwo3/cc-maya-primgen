@@ -1,18 +1,21 @@
-versions=('2015', '2016')
+versions=('2014' , '2015' , '2016')
 op_system='linux'
-plugin_name='baseLoc'
-make_dir='/home/jani/Desktop/baseLoc/build/'$op_system'/'
-destination_dir='/home/jani/Desktop/baseLoc/build/'$op_system'/'
+plugin_name='primGen'
+make_dir='/home/jani/Desktop/primGen/build/'$op_system'/'
+destination_dir='/home/jani/Desktop/primGen/build/'$op_system'/'
 
-echo "Starting build..."
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+echo ""
+printf "${RED}[Starting $plugin_name build...]${NC}\n"
 echo ""
 
 for i in "${versions[@]}"
 	do
-		
 		if [ -e $make_dir$i ]
 		then
-			# echo $destination_dir$i
+			printf "${GREEN}[Found Maya v$i]${NC}\n"
 			cmake --build $make_dir$i --config Release
 			
 			bundle_file=$make_dir$i'/src/Release/'$plugin_name'.su'
@@ -29,6 +32,7 @@ for i in "${versions[@]}"
 		
 	done
 
-echo ""
-echo "Build finished..."
 
+echo ""
+printf "${GREEN}[Build finished...]${NC}\n"
+echo ""
