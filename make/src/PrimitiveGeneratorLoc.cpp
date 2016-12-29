@@ -46,6 +46,9 @@ MStatus PrimitiveGeneratorLoc::compute( const MPlug& plug, MDataBlock& data )
 
 void PrimitiveGeneratorLoc::draw( M3dView & view, const MDagPath & path, M3dView::DisplayStyle style,  M3dView::DisplayStatus status )
 {
+
+#if MAYA_API_VERSION < 201400
+
 	MObject thisNode = thisMObject();
 
 	MFnDependencyNode fnDepCloner( thisNode );
@@ -110,6 +113,8 @@ void PrimitiveGeneratorLoc::draw( M3dView & view, const MDagPath & path, M3dView
 	glPopAttrib();
 
 	view.endGL();
+
+#endif
 
 }
 
@@ -225,7 +230,7 @@ void PrimitiveGeneratorLocOverride::addUIDrawables( const MDagPath& objPath, MHW
 
 	fillCol = MColor( 1.0f, 0.0f, 0.0f, 0.5f );
 	lineCol = MColor( 1.0f, 1.0f, 1.0f, 1.0f );
-	
+
 
 
 	if ( frameContext.getDisplayStyle() & MHWRender::MDrawContext::kWireFrame ) {
@@ -239,7 +244,7 @@ void PrimitiveGeneratorLocOverride::addUIDrawables( const MDagPath& objPath, MHW
 
 
 		fillCol = MColor( pLocatorData->m_locColor.r, pLocatorData->m_locColor.g, pLocatorData->m_locColor.b, fillCol.a );
-		
+
 	}
 
 	if ( MHWRender::MGeometryUtilities::displayStatus(objPath) == M3dView::kActive ) {
@@ -251,11 +256,11 @@ void PrimitiveGeneratorLocOverride::addUIDrawables( const MDagPath& objPath, MHW
 	if ( MHWRender::MGeometryUtilities::displayStatus(objPath) == M3dView::kTemplate ) {
 
 		fillCol = MColor( pLocatorData->m_locColor.r, pLocatorData->m_locColor.g, pLocatorData->m_locColor.b, fillCol.a );
-		
+
 	}
 
 
-	
+
 
 
 	MPoint p = MPoint::origin;
