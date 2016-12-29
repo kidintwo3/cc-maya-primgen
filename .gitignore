@@ -101,5 +101,3 @@ $RECYCLE.BIN/
 *.suo
 *.unsuccessfulbuild
 *.user
-build/win_2017/x64/Release/primGen.mll
-build/win_2017/primgen.vcxproj
