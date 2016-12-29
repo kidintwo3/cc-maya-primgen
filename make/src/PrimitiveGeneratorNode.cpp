@@ -331,6 +331,9 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 		MVector ab = m_inLocB_pos - m_inLocA_pos;
 
 		double abLength = ab.length();
+
+		abLength *= 1.0-m_strandThinning;
+
 		double step = abLength / double(m_segments);
 
 		MVector ab_dir = ab;
@@ -794,6 +797,9 @@ MObject primitiveGenerator::generateTubes()
 
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+
+					
+
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
 					trM.setScale(scale,MSpace::kObject);
 
@@ -835,6 +841,9 @@ MObject primitiveGenerator::generateTubes()
 
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+
+
+
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
 					trM.setScale(scale,MSpace::kObject);
 
