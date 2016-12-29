@@ -44,6 +44,8 @@ MObject     primitiveGenerator::aFirstUpVecZ;
 MObject		primitiveGenerator::aCurveZOffset;
 MObject		primitiveGenerator::aStrandOffset;
 MObject		primitiveGenerator::aStrandThinning;
+MObject		primitiveGenerator::aStrandCurl;
+MObject		primitiveGenerator::aStrandCurlWave;
 
 MObject     primitiveGenerator::aSegmentRamp;
 MObject     primitiveGenerator::aStrandOffsetRamp;
@@ -269,6 +271,7 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 
 
+
 				MVector cross2 =  tan^cross1;
 
 				if(m_alingToUpVector)
@@ -284,6 +287,12 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 				//p += MVector( 0.0, double(s)*3,0.0);
 
 				p += cross1 * m_zOffset;
+
+
+
+
+
+
 
 				double m[4][4] = {{tan.x, tan.y , tan.z, 0.0},
 				{ cross1.x, cross1.y , cross1.z, 0.0},
@@ -346,6 +355,7 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 			jiggle_calculate(cv);
 
 
+
 			for(int i=0; i <= m_segments; i++)
 			{
 				MPoint p(m_inLocA_pos + xDir * step * double(i));
@@ -378,12 +388,19 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 			}
 
+			for (int s=0; s < m_numstrands; s++) 
+			{
+				trMatrixA_vec.push_back(trMatrixA);
+
+			}
+
 		}
 
 		// No jiggle
 		//
 		if (!m_jiggleEnabled)
 		{
+
 
 			for(int i=0; i <= m_segments; i++)
 			{
@@ -400,9 +417,14 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 			}
 
+			for (int s=0; s < m_numstrands; s++) 
+			{
+				trMatrixA_vec.push_back(trMatrixA);
+
+			}
 		}
 
-		trMatrixA_vec.push_back(trMatrixA);
+
 
 	}
 
@@ -509,6 +531,22 @@ MObject primitiveGenerator::generateStrips(){
 			double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
 
 			trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+
+
+
+			//
+
+			double angle_extra=M_PI/180*i;
+			double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
+			double x= (radius_addon) * cos(angle_extra);
+			double z= (radius_addon) * sin(angle_extra);
+
+			x *= m_segmentsProfileA[i];
+			z *= m_segmentsProfileA[i];
+
+			//
+
+			trM.addTranslation(MVector(0.0,x,z),MSpace::kObject);
 			trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
 
 			//
@@ -518,6 +556,12 @@ MObject primitiveGenerator::generateStrips(){
 			trM.setScale(scale,MSpace::kObject);
 
 			double rad = m_r;
+
+
+
+
+
+
 			rad *= m_segmentsProfileA[i];
 
 
@@ -664,8 +708,15 @@ MObject primitiveGenerator::generateStrips(){
 
 	for (int i = 0; i < meshFn.numEdges(); i++)
 	{
-		if (m_smoothNorm) { meshFn.setEdgeSmoothing(i, true);	}
-		if (!m_smoothNorm) { meshFn.setEdgeSmoothing(i, false);	}
+		if (m_smoothNorm)
+		{ 
+			meshFn.setEdgeSmoothing(i, true);	
+		}
+
+		if (!m_smoothNorm) 
+		{ 
+			meshFn.setEdgeSmoothing(i, false);	
+		}
 	}
 
 	return newMeshData;
@@ -720,9 +771,19 @@ MObject primitiveGenerator::generateTubes()
 					x = m_profilePointsA[j].x * m_r;
 					z = m_profilePointsA[j].z * m_r;
 
+
+					//
+
+					double angle_extra=M_PI/180*i;
+					double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
+					x += (radius_addon) * cos(angle_extra);
+					z += (radius_addon) * sin(angle_extra);
+
+					//
+
+
 					x *= m_segmentsProfileA[i];
 					z *= m_segmentsProfileA[i];
-
 
 					MPoint pnt( 0.0, x, z );
 					MTransformationMatrix trM(trMatrixA[s][i]);
@@ -749,8 +810,19 @@ MObject primitiveGenerator::generateTubes()
 					z  = sin( angle ) * m_r;
 
 
+					//
+
+					double angle_extra=M_PI/180*i;
+					double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
+					x += (radius_addon) * cos(angle_extra);
+					z += (radius_addon) * sin(angle_extra);
+
+					//
+
+
 					x *= m_segmentsProfileA[i];
 					z *= m_segmentsProfileA[i];
+
 
 
 					MPoint pnt( 0.0, x, z );
@@ -759,6 +831,7 @@ MObject primitiveGenerator::generateTubes()
 					double scale[3] = {1.0,m_width,m_height};
 					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
 					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+
 
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
@@ -1117,10 +1190,26 @@ MObject primitiveGenerator::generateTubes()
 	status = meshFn.assignUVs(uvCounts,uvIds);
 	CHECK_MSTATUS( status );
 
+
+	//MGlobal::displayInfo(MString() + "----");
+
 	for (int i = 0; i < meshFn.numEdges(); i++)
 	{
-		if (m_smoothNorm) { meshFn.setEdgeSmoothing(i, true);	}
-		if (!m_smoothNorm) { meshFn.setEdgeSmoothing(i, false);	}
+		if (m_smoothNorm)
+		{ 
+
+
+			meshFn.setEdgeSmoothing(i, true);	
+
+		}
+
+		if (!m_smoothNorm) 
+		{ 
+			meshFn.setEdgeSmoothing(i, false);	
+		}
+
+
+
 	}
 
 	return newMeshData;
@@ -1235,6 +1324,10 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandOffset			= data.inputValue( aStrandOffset, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandCurl			= data.inputValue( aStrandCurl, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandCurlWave		= data.inputValue( aStrandCurlWave, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandThinning		= data.inputValue( aStrandThinning, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_sides					= data.inputValue( aSides, &status ).asInt();
@@ -1335,14 +1428,14 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 		{
 			MFnNurbsCurve mfC(m_o_curve);
 			double curveLen = mfC.length();
-			m_segments = curveLen * m_autoSegRes;
+			m_segments =  int(curveLen * double(m_autoSegRes));
 		}
 
 		// If A-B
 		if (m_type == 1)
 		{
 			double curveLen = m_inLocA_pos.distanceTo(m_inLocB_pos);
-			m_segments = curveLen * m_autoSegRes;
+			m_segments = int(curveLen * double(m_autoSegRes));
 		}
 
 		// Failsafe check again... just to be sure
@@ -1663,6 +1756,7 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aStrandOffset );
 
+
 	primitiveGenerator::aStrandThinning = nAttr.create( "strandThinning", "strandThinning", MFnNumericData::kDouble );
 	nAttr.setDefault( 0.0 );
 	nAttr.setMin(0.0);
@@ -1671,6 +1765,24 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aStrandThinning );
+
+	primitiveGenerator::aStrandCurl = nAttr.create( "strandCurl", "strandCurl", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setMin(0.0);
+	nAttr.setSoftMax(1.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandCurl );
+
+	primitiveGenerator::aStrandCurlWave = nAttr.create( "strandCurlWave", "strandCurlWave", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setMin(0.0);
+	nAttr.setSoftMax(10.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandCurlWave );
 
 	primitiveGenerator::aCurveZOffset = nAttr.create( "curveZOffset", "curveZOffset", MFnNumericData::kDouble );
 	nAttr.setDefault( 0.0 );
@@ -1894,6 +2006,8 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aStrandThinning, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegmentRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffsetRamp, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandCurl, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandCurlWave, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aProfilePresets, primitiveGenerator::aOutMesh);
 
 	// Override

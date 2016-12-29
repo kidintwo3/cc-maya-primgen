@@ -1,11 +1,7 @@
 //deleteUI AttrEdprimitiveGeneratorFormLayout;
 global proc AEprimitiveGeneratorTemplate( string $nodeName )
 {
-    
-    //editorTemplate -callCustom "AE_referenceCurve_base_create" "AE_referenceCurve_base_edit" "";
-    
     editorTemplate -beginScrollLayout;
- 
     editorTemplate -beginLayout "Profile" -collapse 0;
         editorTemplate -addControl "profilePresets";
         editorTemplate -addControl "radius";
@@ -29,6 +25,8 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 		editorTemplate -label "Strands" -addControl "strands";
 		editorTemplate -label "Strand Offset" -addControl "strandOffset";
 		editorTemplate -label "Strand Thinning" -addControl "strandThinning";
+		editorTemplate -label "Strand Curl" -addControl "strandCurl";
+		editorTemplate -label "Strand Curl Wave" -addControl "strandCurlWave";
 		AEaddRampControl( $nodeName + ".strandOffsetRamp" );
     editorTemplate -endLayout;
 	
@@ -72,8 +70,12 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 		editorTemplate -addControl "baseMeshDisplayOverride";
     editorTemplate -endLayout;
     
-	editorTemplate -beginLayout "Bake Mesh" -collapse 0;
+	editorTemplate -beginLayout "Bake Mesh" -collapse 1;
 		editorTemplate -callCustom "AE_bakeMesh_create" "AE_bakeMesh_edit" ""; 
+	editorTemplate -endLayout;
+	
+	editorTemplate -beginLayout "Extra options" -collapse 0;
+		editorTemplate -callCustom "AE_selectMesh_create" "AE_selectMesh_edit" ""; 
 	editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Plug-in Info" -collapse 1;
@@ -93,7 +95,6 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 	editorTemplate -suppress "firstUpVecX";
 	editorTemplate -suppress "firstUpVecY";
 	editorTemplate -suppress "firstUpVecZ";
-	
 	// Legacy
 	editorTemplate -suppress "segmentsLoop";
 }
@@ -115,23 +116,19 @@ global proc AE_primgen_website_create(string $attrName)
     rowLayout -numberOfColumns 3 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
     text -al "left" -label "Support / Info";
     textField -ed false;
-    iconTextButton -al "left" -ann "Gumroad Page" -style "iconOnly" -image1 "shellModNode_CCLogo.png" -c "AE_primgen_launch_website()";
-
+    iconTextButton -al "left" -ann "Gumroad Page" -style "iconOnly" -image1 "primitiveGenerator_CCLogo.png" -c "AE_primgen_launch_website()";
     setParent ..;
 }
 
 global proc AE_primgen_website_edit(string $attrName)
 {
-
 }
 
 global proc AE_referenceCurve_create(string $attrName)
 {
 	string $nodeName[];
     tokenize($attrName, ".", $nodeName);
-    
     string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
-    
     rowLayout -numberOfColumns 4 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
     text -al "left" -label "Profile Curve";
     textField -ed false -bgc 0.5 0.5 0.5 -tx $sm_pr_inputCurve[0] "t_refName";
@@ -145,22 +142,83 @@ global proc AE_referenceCurve_edit(string $attrName)
 {
     string $nodeName[];
     tokenize($attrName, ".", $nodeName);
-    
-	
 	button -edit -c ("AE_referenceCurve_add " + $nodeName[0] ) "pres_refcurve_set";
 	button -edit -c ("AE_referenceCurve_remove " + $nodeName[0] ) "pres_refcurve_remove";
-	
 	string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
 	textField -edit -tx $sm_pr_inputCurve[0] "t_refName";
+}
+
+
+global proc AE_selectMesh_create(string $attrName)
+{
+	string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
+
+    rowLayout -numberOfColumns 3  -bgc 0.2 0.2 0.2;
+    button -label "Select input curve / output mesh" -h 20 -w 200 -bgc 0.8 0.4 0.4 -c  ("AE_select_curve_mesh " + $nodeName[0] ) "select_curve_mesh";
+    button -label "Select output mesh" -h 20 -w 100 -bgc 0.6 0.2 0.8 -c  ("AE_select_mesh " + $nodeName[0] ) "select_mesh";
+    button -label "Select input curve" -h 20 -w 100 -bgc 0.2 0.6 0.8 -c  ("AE_select_curve " + $nodeName[0] ) "select_curve";
+    setParent ..;
+    
+    
+}
+
+global proc AE_selectMesh_edit(string $attrName)
+{
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+	button -edit -c ("AE_select_mesh " + $nodeName[0] ) "select_mesh";
+	button -edit -c ("AE_select_curve " + $nodeName[0] ) "select_curve";
+	button -edit -c ("AE_select_curve_mesh " + $nodeName[0] ) "select_curve_mesh";
+}
+
+global proc AE_select_mesh(string $attrName)
+{
+	
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    string $pg_list_otputMeshes[] = eval("listConnections " + $nodeName[0] + ".outMesh");
+    if (size($pg_list_otputMeshes) > 0) 
+    {
+        select -r $pg_list_otputMeshes[0];
+    }
+}
+
+global proc AE_select_curve(string $attrName)
+{
+	
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    string $pg_list_inputCurves[] = eval("listConnections " + $nodeName[0] + ".inCurve");
+    if (size($pg_list_inputCurves) > 0) 
+    {
+        select -r $pg_list_inputCurves[0];
+    }
+}
+
+global proc AE_select_curve_mesh(string $attrName)
+{
+	
+    string $nodeName[];
+    tokenize($attrName, ".", $nodeName);
+    string $pg_list_inputCurves[] = eval("listConnections " + $nodeName[0] + ".inCurve");
+    string $pg_list_otputMeshes[] = eval("listConnections " + $nodeName[0] + ".outMesh");
+    if (size($pg_list_inputCurves) > 0) 
+    {
+        if (size($pg_list_otputMeshes) > 0)
+        {
+            select -r $pg_list_inputCurves[0];
+            select -add $pg_list_otputMeshes[0];
+        }
+    }
 }
 
 global proc AE_bakeMesh_create(string $attrName)
 {
 	string $nodeName[];
     tokenize($attrName, ".", $nodeName);
-    
     string $sm_pr_inputCurve[] = eval("listConnections " + $nodeName[0] + ".refCurve");
-    
     rowLayout -numberOfColumns 2 -adjustableColumn 2 -bgc 0.2 0.2 0.2;
     button -label "Bake mesh / delete node" -h 20 -w 200 -bgc 0.8 0.2 0.3 -c  ("AE_bake_and_delete_mesh " + $nodeName[0] ) "bake_mesh_and_delete";
     button -label "Bake mesh" -h 20 -w 200 -bgc 0.2 0.8 0.6 -c  ("AE_bake_mesh " + $nodeName[0] ) "bake_mesh";
@@ -172,57 +230,42 @@ global proc AE_bakeMesh_edit(string $attrName)
 {
     string $nodeName[];
     tokenize($attrName, ".", $nodeName);
-
 	button -edit -c ("AE_bake_and_delete_mesh " + $nodeName[0] ) "bake_mesh_and_delete";
 	button -edit -c ("AE_bake_mesh " + $nodeName[0] ) "bake_mesh";
-
 }
 
 global proc AE_bake_and_delete_mesh(string $attrName)
 {
-	
     string $nodeName[];
     tokenize($attrName, ".", $nodeName);
     
     string $pg_conn_outputMeshs[] = `listConnections -d on -s off ($nodeName[0] + ".outMesh")`;
 
-    
     if (size($pg_conn_outputMeshs) > 0) 
     {
         undoInfo -ock;
-
         setAttr ($nodeName[0] + ".baseMeshDisplayOverride") 0;
         delete $nodeName[0];
-        select -r $pg_conn_outputMeshs[0];
-        
+        select -r $pg_conn_outputMeshs[0]; 
         undoInfo -cck;
-        
     }
-
 }
 
 global proc AE_bake_mesh(string $attrName)
 {
-	
-string $nodeName[];
+    string $nodeName[];
     tokenize($attrName, ".", $nodeName);
-    
     string $pg_list_inputCurves[] = eval("listConnections " + $nodeName[0] + ".outMesh");
     if (size($pg_list_inputCurves) > 0) 
     {
-        
         string $new_node_Name[] = `duplicate $pg_list_inputCurves[0]`;
         
         if (size($new_node_Name) > 0)
         {
-            // find shape node and set override
             string $new_node_shape[] = `listRelatives -s -path $new_node_Name[0]`;
-            
             undoInfo -ock;
-            
             setAttr ($new_node_shape[0] + ".overrideEnabled") 0;
             select -r $new_node_Name[0];
-            
             undoInfo -cck;
         }
     }
@@ -232,7 +275,6 @@ string $nodeName[];
 
 global proc AE_referenceCurve_add(string $attrName)
 {
-	
 	string $nodeName[];
     tokenize($attrName, ".", $nodeName);
 	
@@ -244,7 +286,6 @@ global proc AE_referenceCurve_add(string $attrName)
         {
             string $nodeType;
             $nodeType = `nodeType $selShape[0]`;
-            
             if( $nodeType == "nurbsCurve")
             {
                 connectAttr -force ($selShape[0]+".local") ($nodeName[0]+".refCurve") ;
@@ -258,7 +299,6 @@ global proc AE_referenceCurve_add(string $attrName)
 
 global proc AE_referenceCurve_remove(string $attrName)
 {
-	
 	string $nodeName[];
     tokenize($attrName, ".", $nodeName);
     
@@ -268,6 +308,4 @@ global proc AE_referenceCurve_remove(string $attrName)
         eval("disconnectAttr " + $pg_list_inputCurves[0] + ".local" + " " + $nodeName[0] + ".refCurve");
         textField -edit -bgc 0.5 0.5 0.5 -tx ""  "t_refName";
     }
-
-    
 }

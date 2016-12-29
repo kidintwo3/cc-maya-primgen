@@ -79,8 +79,15 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		MFnDependencyNode mfDgN(o_primGenNode);
 		MPlug a_curveAttribute = mfDgN.findPlug("segmentsRamp", status);
 
-		MRampAttribute a_Ramp(a_curveAttribute);
-		a_Ramp.setValueAtIndex(1.0,0);
+		MPlug a_strandOffsetAttribute = mfDgN.findPlug("strandOffsetRamp", &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
+
+		MRampAttribute a_strandOffset_Ramp(a_curveAttribute);
+		MRampAttribute a_segments_Ramp(a_strandOffsetAttribute);
+
+		a_segments_Ramp.setValueAtIndex(1.0,0);
+		a_strandOffset_Ramp.setValueAtIndex(1.0,0);
 
 		assignInitialShadingGroup(o_outputMesh);
 
@@ -136,7 +143,12 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 	MFnDependencyNode mfDgN(o_primGenNode);
 	MPlug a_curveAttribute = mfDgN.findPlug("segmentsRamp", &status);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
-	MRampAttribute a_Ramp(a_curveAttribute);
+
+	MPlug a_strandOffsetAttribute = mfDgN.findPlug("strandOffsetRamp", &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
+	MRampAttribute a_segments_Ramp(a_curveAttribute);
+	MRampAttribute a_strandOffset_Ramp(a_strandOffsetAttribute);
 
 	//// Overrides on output mesh
 
@@ -160,8 +172,11 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		setPlugs(o_primGenNode, "sides", "20");
 		setPlugs(o_primGenNode, "jiggleEnabled", "false");
 
-		a_Ramp.setValueAtIndex(1.0,0);
+		a_segments_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
 
+		a_strandOffset_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
 	}
 
 
@@ -192,10 +207,11 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		m_curve_values.append(0.0);
 
 
-		status = a_Ramp.setRamp(m_curve_values, m_curve_positions, m_curve_interps);
+		status = a_segments_Ramp.setRamp(m_curve_values, m_curve_positions, m_curve_interps);
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
-
+		a_strandOffset_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		// Connect time
 		MSelectionList selection;
@@ -318,6 +334,8 @@ MStatus primitiveGeneratorCommand::undoIt()
 		deleteNode(o_outputMeshA[i]);
 	}
 
+	deleteNode(o_locA);
+	deleteNode(o_locB);
 
 
 	return MS::kSuccess;
