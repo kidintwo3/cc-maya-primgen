@@ -1,4 +1,4 @@
-$versions = @("2014","2015","2016","2016.5","2017")
+$versions = @("2015","2016","2016.5","2017")
 $op_system = "win"
 $plugin_name = "primGen"
 $destination_dir = "p:/Maya/GitHub/cc-maya-primgen/build/"+$op_system+"/"
