@@ -60,6 +60,8 @@ MObject     primitiveGenerator::aVOffsetCap;
 MObject     primitiveGenerator::aUWidth;
 MObject     primitiveGenerator::aVWidth;
 MObject     primitiveGenerator::aUVRotate;
+MObject     primitiveGenerator::aUVAutoV;
+MObject     primitiveGenerator::aUVAutoVMultiplier;
 
 // Overrides
 
@@ -656,6 +658,9 @@ MObject primitiveGenerator::generateStrips(){
 	double u_offset = m_uOffset;
 	double v_offset = m_vOffset;
 
+
+	/*uv_height *=  (1.0-m_strandThinning);*/
+
 	if (uv_height == 0.0) {
 		uv_height = 0.001;
 	}
@@ -663,6 +668,29 @@ MObject primitiveGenerator::generateStrips(){
 	if (uv_width == 0.0) {
 		uv_width = 0.001;
 	}
+
+
+	// Auto UV - V scale : 
+	if (m_autoUV_V)
+	{
+		// Spline
+		if (m_type == 0)
+		{
+			MFnNurbsCurve curveFn(m_o_curve);
+			uv_width = (curveFn.length()*(1.0-m_strandThinning));
+			uv_width *= m_autoUV_V_mult;
+		}
+
+		// A-B
+		if (m_type == 1)
+		{
+
+			MVector ab = m_inLocB_pos - m_inLocA_pos;
+			uv_width = (ab.length()*(1.0-m_strandThinning));
+			uv_width *= m_autoUV_V_mult;
+		}
+	}
+
 
 	double u = uv_height / double(m_segments);
 
@@ -801,7 +829,7 @@ MObject primitiveGenerator::generateTubes()
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 
-					
+
 
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
 					trM.setScale(scale,MSpace::kObject);
@@ -1132,6 +1160,26 @@ MObject primitiveGenerator::generateTubes()
 
 		}
 
+		// Auto UV - V scale : 
+		if (m_autoUV_V)
+		{
+			// Spline
+			if (m_type == 0)
+			{
+				MFnNurbsCurve curveFn(m_o_curve);
+				m_vWidth = (curveFn.length()*(1.0-m_strandThinning));
+				m_vWidth *= m_autoUV_V_mult;
+			}
+
+			// A-B
+			if (m_type == 1)
+			{
+
+				MVector ab = m_inLocB_pos - m_inLocA_pos;
+				m_vWidth = (ab.length()*(1.0-m_strandThinning));
+				m_vWidth *= m_autoUV_V_mult;
+			}
+		}
 
 		for (int i=0; i < m_segments + 1; i++) {
 
@@ -1385,6 +1433,10 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_uvRotate				= data.inputValue( aUVRotate, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_autoUV_V				= data.inputValue( aUVAutoV, &status ).asBool();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_autoUV_V_mult			= data.inputValue( aUVAutoVMultiplier, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 
 
 	// Override
@@ -1439,14 +1491,14 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 		if (m_type == 0)
 		{
 			MFnNurbsCurve mfC(m_o_curve);
-			double curveLen = mfC.length();
+			double curveLen = mfC.length() * (1.0-m_strandThinning);
 			m_segments =  int(curveLen * double(m_autoSegRes));
 		}
 
 		// If A-B
 		if (m_type == 1)
 		{
-			double curveLen = m_inLocA_pos.distanceTo(m_inLocB_pos);
+			double curveLen = m_inLocA_pos.distanceTo(m_inLocB_pos) * (1.0-m_strandThinning);
 			m_segments = int(curveLen * double(m_autoSegRes));
 		}
 
@@ -1752,12 +1804,21 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aOnlyKnotSegmentsRes );
 
+
 	primitiveGenerator::aAutoSegments = nAttr.create( "autoSegments", "autoSegments", MFnNumericData::kBoolean );
 	nAttr.setDefault( false );
 	nAttr.setKeyable( true );
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aAutoSegments );
+
+	primitiveGenerator::aUVAutoV = nAttr.create( "autoUVV", "autoUVV", MFnNumericData::kBoolean );
+	nAttr.setDefault( false );
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aUVAutoV );
+
 
 	primitiveGenerator::aAutoSegmentsRes = nAttr.create( "autoSegmentsMultiplier", "autoSegmentsMultiplier", MFnNumericData::kInt );
 	nAttr.setDefault( 2 );
@@ -1786,6 +1847,15 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aStrandThinning );
+
+	primitiveGenerator::aUVAutoVMultiplier = nAttr.create( "autoUVVMultiplier", "autoUVVMultiplier", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setSoftMin(0.0);
+	nAttr.setSoftMax(2.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aUVAutoVMultiplier );
 
 	primitiveGenerator::aStrandCurl = nAttr.create( "strandCurl", "strandCurl", MFnNumericData::kDouble );
 	nAttr.setDefault( 0.0 );
@@ -2045,6 +2115,8 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aUWidth, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aVWidth, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aUVRotate, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aUVAutoV, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aUVAutoVMultiplier, primitiveGenerator::aOutMesh);
 
 	//MGlobal::executeCommand( "makePaintable -attrType multiFloat -sm deformer deltaRelax weights;" );
 

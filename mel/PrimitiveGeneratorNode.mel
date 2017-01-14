@@ -50,6 +50,9 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
         editorTemplate -addControl "uWidth";
         editorTemplate -addControl "vWidth";
         editorTemplate -addControl "uvRotate";
+		editorTemplate -addSeparator;
+		editorTemplate -label "Auto V length" -addControl "autoUVV";
+		editorTemplate -label "Auto V length Multiplier" -addControl "autoUVVMultiplier";
     editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Custom profile Curve" -collapse 0;
@@ -84,20 +87,19 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 	editorTemplate -endLayout;
 	
 	AEabstractBaseCreateTemplate $nodeName;
-	
     editorTemplate -addExtraControls;
 	editorTemplate -endScrollLayout;
-
 	editorTemplate -suppress "outMesh";
 	editorTemplate -suppress "inCurve";
-	
 	editorTemplate -suppress "locatorAPos";
 	editorTemplate -suppress "locatorBPos";
 	editorTemplate -suppress "firstUpVecX";
 	editorTemplate -suppress "firstUpVecY";
 	editorTemplate -suppress "firstUpVecZ";
-	// Legacy
 	editorTemplate -suppress "segmentsLoop";
+	editorTemplate -suppress "useInputCurve";
+	editorTemplate -suppress "refCurve";
+	editorTemplate -suppress "time";
 }
 
 
