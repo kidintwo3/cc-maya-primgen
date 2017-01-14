@@ -82,12 +82,20 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		MPlug a_strandOffsetAttribute = mfDgN.findPlug("strandOffsetRamp", &status);
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
+		MPlug a_twistAttribute = mfDgN.findPlug("twistRamp", &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
 
 		MRampAttribute a_strandOffset_Ramp(a_curveAttribute);
 		MRampAttribute a_segments_Ramp(a_strandOffsetAttribute);
+		MRampAttribute a_twist_Ramp(a_twistAttribute);
 
-		a_segments_Ramp.setValueAtIndex(1.0,0);
-		a_strandOffset_Ramp.setValueAtIndex(1.0,0);
+		a_segments_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+		a_strandOffset_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+		a_twist_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		assignInitialShadingGroup(o_outputMesh);
 
@@ -147,8 +155,12 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 	MPlug a_strandOffsetAttribute = mfDgN.findPlug("strandOffsetRamp", &status);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	MPlug a_twistAttribute = mfDgN.findPlug("twistRamp", &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
 	MRampAttribute a_segments_Ramp(a_curveAttribute);
 	MRampAttribute a_strandOffset_Ramp(a_strandOffsetAttribute);
+	MRampAttribute a_twist_Ramp(a_twistAttribute);
 
 	//// Overrides on output mesh
 
@@ -176,6 +188,9 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		a_strandOffset_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
+		a_twist_Ramp.setValueAtIndex(1.0,0, &status);
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 	}
 
@@ -211,6 +226,9 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		a_strandOffset_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
+		a_twist_Ramp.setValueAtIndex(1.0,0, &status);
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		// Connect time

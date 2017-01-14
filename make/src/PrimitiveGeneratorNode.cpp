@@ -49,6 +49,7 @@ MObject		primitiveGenerator::aStrandCurlWave;
 
 MObject     primitiveGenerator::aSegmentRamp;
 MObject     primitiveGenerator::aStrandOffsetRamp;
+MObject		primitiveGenerator::aTwistRamp;
 
 // UV
 MObject     primitiveGenerator::aCapUVSize;
@@ -519,7 +520,8 @@ MObject primitiveGenerator::generateStrips(){
 
 
 			double angleRot = m_rotate / 180.0 * M_PI;
-			angleRot += m_twist*i / double(m_segments);
+			//angleRot += m_twist*i / double(m_segments);
+			angleRot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
 
 			MTransformationMatrix trM(trMatrixA[s][i]);
 			double scale[3] = {1.0,m_width,0.0};
@@ -767,7 +769,8 @@ MObject primitiveGenerator::generateTubes()
 
 				double angle = deg * j / 180.0  * M_PI;
 				double angleRot = m_rotate / 180.0 * M_PI;
-				angleRot += m_twist*i / double(m_segments);
+				// angleRot += m_twist*i / double(m_segments);
+				angleRot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
 
 				if (m_useProfile)
 				{
@@ -1477,6 +1480,12 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandOffsetProfileA = storeProfileCurveData(a_strandsOffsetAttribute, m_segments, m_segmentsLoop);
 
+
+	// Ramp attribute
+	MRampAttribute a_twistAttribute(this->thisMObject(), aTwistRamp, &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_twistProfileA = storeProfileCurveData(a_twistAttribute, m_segments, m_segmentsLoop);
+
 	//
 	m_profilePointsA.clear();
 
@@ -1704,6 +1713,9 @@ MStatus primitiveGenerator::initialize()
 
 	primitiveGenerator::aSegmentRamp = rAttr.createCurveRamp("segmentsRamp", "segmentsRamp");
 	addAttribute(aSegmentRamp);
+
+	primitiveGenerator::aTwistRamp = rAttr.createCurveRamp("twistRamp", "twistRamp");
+	addAttribute(aTwistRamp);
 
 	primitiveGenerator::aUseInputCurve = nAttr.create( "useInputCurve", "useInputCurve", MFnNumericData::kBoolean );
 	nAttr.setDefault( false );
@@ -2015,6 +2027,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aStrandThinning, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegmentRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffsetRamp, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aTwistRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandCurl, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandCurlWave, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aProfilePresets, primitiveGenerator::aOutMesh);

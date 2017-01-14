@@ -34,6 +34,7 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 		editorTemplate -label "Rotation" -addControl "rotate";
 		editorTemplate -label "Twist" -addControl "twist";
 		editorTemplate -label "Offset curve normal" -addControl "curveZOffset";
+		AEaddRampControl( $nodeName + ".twistRamp" );
     editorTemplate -endLayout;
     
     editorTemplate -beginLayout "Ramp Deformer Attributes" -collapse 0;

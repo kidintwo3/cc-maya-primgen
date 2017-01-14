@@ -139,6 +139,7 @@ public:
 
 	static MObject		aSegmentRamp;
 	static MObject		aStrandOffsetRamp;
+	static MObject		aTwistRamp;
 
 
 	// UV
@@ -180,6 +181,7 @@ private:
 	MPointArray			m_profilePointsA;
 	MFloatArray			m_segmentsProfileA;
 	MFloatArray			m_strandOffsetProfileA;
+	MFloatArray			m_twistProfileA;
 
 	MPoint				m_inLocA_pos;
 	MPoint				m_inLocB_pos;

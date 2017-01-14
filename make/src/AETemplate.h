@@ -50,6 +50,7 @@ MString mel_AETemplate()
 		"		editorTemplate -label \"Rotation\" -addControl \"rotate\";\r\n"
 		"		editorTemplate -label \"Twist\" -addControl \"twist\";\r\n"
 		"		editorTemplate -label \"Offset curve normal\" -addControl \"curveZOffset\";\r\n"
+		"		AEaddRampControl( $nodeName + \".twistRamp\" );\r\n"
 		"    editorTemplate -endLayout;\r\n"
 		"    \r\n"
 		"    editorTemplate -beginLayout \"Ramp Deformer Attributes\" -collapse 0;\r\n"
