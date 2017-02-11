@@ -124,7 +124,10 @@ public:
 	static MObject      aCurveZOffset;
 
 	static MObject      aStrandOffset;
+	static MObject      aStrandOffsetRandom;
 	static MObject      aStrandThinning;
+	static MObject      aStrandThinningRandomness;
+	static MObject      aStrandThinningSeed;
 	static MObject		aStrandCurl;
 	static MObject		aStrandCurlWave;
 
@@ -169,9 +172,9 @@ public:
 
 private:
 
-	double				m_r, m_width, m_height,  m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult;
+	double				m_r, m_width, m_height,  m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
-	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop;
+	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop, m_strandThinningSeed;
 	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V;
 	short				m_profilePreset;
 	MVector				m_firstUpVec;
@@ -179,6 +182,9 @@ private:
 	MObject				m_o_curve_ref;
 
 	MMatrix				m_curveMatrix;
+
+	MDoubleArray		m_rndAr;
+	MDoubleArray		m_lengthAr;
 
 	MPointArray			m_profilePointsA;
 	MFloatArray			m_segmentsProfileA;

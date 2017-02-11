@@ -18,11 +18,21 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "1.82", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "1.85", "Any");
 
-	icons_data_write();
 
-	MGlobal::executeCommand( mel_createShelf() );
+	if( !std::getenv("PRIMGEN_REBUILD_ICONS") )
+	{
+		icons_data_write();
+	}
+
+	if( !std::getenv("PRIMGEN_REBUILD_SHELF") )
+	{
+		MGlobal::executeCommand( mel_createShelf() );
+	}
+
+
+	
 	MGlobal::executeCommand( mel_AETemplate() );
 
 	status = fnPlugin.registerCommand( "primitiveGeneratorCommand", primitiveGeneratorCommand::creator, primitiveGeneratorCommand::newSyntax );

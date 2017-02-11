@@ -43,7 +43,10 @@ MObject     primitiveGenerator::aFirstUpVecZ;
 
 MObject		primitiveGenerator::aCurveZOffset;
 MObject		primitiveGenerator::aStrandOffset;
+MObject		primitiveGenerator::aStrandOffsetRandom;
 MObject		primitiveGenerator::aStrandThinning;
+MObject		primitiveGenerator::aStrandThinningRandomness;
+MObject		primitiveGenerator::aStrandThinningSeed;
 MObject		primitiveGenerator::aStrandCurl;
 MObject		primitiveGenerator::aStrandCurlWave;
 
@@ -102,7 +105,7 @@ void* primitiveGenerator::creator()
 
 void primitiveGenerator::postConstructor(){
 	m_init = false;
-	srand ( time(NULL) );
+
 	MObject oSelf = thisMObject();
 
 	// delete callback
@@ -183,6 +186,25 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 	std::vector<MMatrixArray> trMatrixA_vec;
 
+	trMatrixA_vec.clear();
+	trMatrixA.clear();
+
+	srand(m_strandThinningSeed);
+
+	m_lengthAr.clear();
+
+	// random array
+
+	m_rndAr.clear();
+	m_rndAr.setLength(m_numstrands);
+
+	for (int i = 0; i < m_rndAr.length(); i++)
+	{
+		m_rndAr[i] = rand() % 100;
+		// m_rndAr[i] *= 1.0-m_trandThinningRandomness;
+	}
+
+
 	// Spline
 	if (m_type == 0)
 	{
@@ -213,60 +235,62 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 		curveFn.getCVs(cvA, MSpace::kWorld);
 
 
-		// random array
-
-		double foo [8] = { 0.2, 0.8, 0.5, 0.1, 0.3, 0.7, 0.6, 0.9};
-		MDoubleArray rndAr(foo,8);
-
-		MDoubleArray rndArFade;
-		rndArFade.setLength(m_numstrands);
-
-		int c = 0;
-
-		for (int i =0;i < m_numstrands;i++) 
-		{
-
-			rndArFade.set(rndAr[c] * m_strandThinning,i);
-
-			c+=1;
-
-			if (c >= rndAr.length())
-			{
-				c = 0;
-			}
-
-		}
-
-
-
 		// If full spline
-
 		for (int s=0; s < m_numstrands; s++) 
 		{
 
+			double mult = m_rndAr[s] * 0.01;
 
+			mult += (1.0-m_trandThinningRandomness);
+
+			if (mult>1.0)
+			{
+				mult = 1.0;
+			}
 
 			double length = (curveFn.length() / double(m_segments) );
+			length *= 1.0 - (m_strandThinning * mult);
 
-			length *= 1.0 - m_strandThinning;
+			m_lengthAr.append(length);
+
+
+			// length *= 1.0 - m_strandThinning;
 
 			for(int i=0; i < m_segments+1; i++)
 			{
 
 				MPoint p;
 
-				double param = curveFn.findParamFromLength( double(i) * length );
-				curveFn.getPointAtParam(param, p, MSpace::kWorld );
+				double param = curveFn.findParamFromLength( double(i) * length, &status );
+				// CHECK_MSTATUS(status);
+
+
+
+				status = curveFn.getPointAtParam(param, p, MSpace::kWorld );
+				// CHECK_MSTATUS(status);
 
 				if (m_segOnlyKnots)
 				{
-					curveFn.getParamAtPoint(cvA[i], param, 1.0, MSpace::kWorld);
+					status = curveFn.getParamAtPoint(cvA[i], param, 1.0, MSpace::kWorld);
+					// CHECK_MSTATUS(status);
 					p = cvA[i];
 				}
 
 
 
-				MVector tan = curveFn.tangent(param , MSpace::kWorld);
+				MVector tan = curveFn.tangent(param , MSpace::kWorld, &status);
+
+				if (i==0)
+				{
+					currentNormal = -curveFn.normal(param , MSpace::kWorld, &status);
+
+					currentNormal += m_firstUpVec;
+
+				}
+
+
+
+				// CHECK_MSTATUS(status);
 				tan.normalize();
 
 				MVector cross1 = currentNormal^tan;
@@ -306,7 +330,7 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 				rotMatrix = m;
 
-				pA.append( p );
+				//pA.append( p );
 
 				// put everything back
 				trMatrixA.append(rotMatrix);
@@ -315,6 +339,8 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 
 			trMatrixA_vec.push_back(trMatrixA);
+
+			trMatrixA.clear();
 
 		}
 
@@ -491,6 +517,8 @@ MStatus primitiveGenerator::jiggle_calculate(MFloatVector goal)
 	return MStatus::kSuccess;
 }
 
+
+
 MObject primitiveGenerator::generateStrips(){
 
 	MStatus status;
@@ -514,6 +542,18 @@ MObject primitiveGenerator::generateStrips(){
 	double r_x = 0.0;
 	double r_z = 0.0;
 
+
+	// Generate random offset array
+	MDoubleArray rndOffAr;
+	rndOffAr.setLength(m_numstrands);
+
+	for (int i = 0; i < rndOffAr.length(); i++)
+	{
+		rndOffAr[i] = rand() % 100;
+	}
+
+
+	// Generate strands
 	for (int s=0; s < m_numstrands; s++) 
 	{
 
@@ -532,10 +572,16 @@ MObject primitiveGenerator::generateStrips(){
 
 			//
 
+			double mult = rndOffAr[s] * 0.01;
+			mult += (1.0-m_strandOffsetRandom);
 
+			if (mult>1.0)
+			{
+				mult = 1.0;
+			}
 
 			double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
-			double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+			double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
 
 			trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 
@@ -545,8 +591,12 @@ MObject primitiveGenerator::generateStrips(){
 
 			double angle_extra=M_PI/180*i;
 			double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
+
+			// radius_addon *=  (m_rndAr[s] * 0.01);
+
 			double x= (radius_addon) * cos(angle_extra);
 			double z= (radius_addon) * sin(angle_extra);
+
 
 			x *= m_segmentsProfileA[i];
 			z *= m_segmentsProfileA[i];
@@ -1384,11 +1434,17 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandOffset			= data.inputValue( aStrandOffset, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandOffsetRandom	= data.inputValue( aStrandOffsetRandom, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandCurl			= data.inputValue( aStrandCurl, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandCurlWave		= data.inputValue( aStrandCurlWave, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandThinning		= data.inputValue( aStrandThinning, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_trandThinningRandomness		= data.inputValue( aStrandThinningRandomness, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandThinningSeed		= data.inputValue( aStrandThinningSeed, &status ).asInt();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_sides					= data.inputValue( aSides, &status ).asInt();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -1760,6 +1816,15 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aSegmentsLoop );
 
+	primitiveGenerator::aStrandThinningSeed = nAttr.create( "strandThinningSeed", "strandThinningSeed", MFnNumericData::kInt );
+	nAttr.setDefault( 1 );
+	nAttr.setMin( 1 );
+	nAttr.setMax( 999 );
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandThinningSeed );
+
 	primitiveGenerator::aStrandOffsetRamp = rAttr.createCurveRamp("strandOffsetRamp", "strandOffsetRamp");
 	addAttribute(aStrandOffsetRamp);
 
@@ -1838,6 +1903,15 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aStrandOffset );
 
+	primitiveGenerator::aStrandOffsetRandom = nAttr.create( "strandOffsetRandom", "strandOffsetRandom", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setMin(0.0);
+	nAttr.setMax(1.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandOffsetRandom );
+
 
 	primitiveGenerator::aStrandThinning = nAttr.create( "strandThinning", "strandThinning", MFnNumericData::kDouble );
 	nAttr.setDefault( 0.0 );
@@ -1883,6 +1957,16 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aCurveZOffset );
+
+	primitiveGenerator::aStrandThinningRandomness = nAttr.create( "strandThinningRandomness", "strandThinningRandomness", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setMin(0.0);
+	nAttr.setMax(1.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandThinningRandomness );
+
 
 
 	aInLocAPos = mAttr.create( "locatorAPos", "locatorAPos", MFnMatrixAttribute::kDouble );
@@ -2094,7 +2178,10 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aFirstUpVec, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aCurveZOffset, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffset, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandOffsetRandom, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinning, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandThinningRandomness, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandThinningSeed, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSegmentRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffsetRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aTwistRamp, primitiveGenerator::aOutMesh);
