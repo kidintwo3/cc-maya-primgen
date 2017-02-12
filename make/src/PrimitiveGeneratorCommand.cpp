@@ -158,9 +158,13 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 	MPlug a_twistAttribute = mfDgN.findPlug("twistRamp", &status);
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 
+	MPlug a_curlAttribute = mfDgN.findPlug("strandCurlRamp", &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+
 	MRampAttribute a_segments_Ramp(a_curveAttribute);
 	MRampAttribute a_strandOffset_Ramp(a_strandOffsetAttribute);
 	MRampAttribute a_twist_Ramp(a_twistAttribute);
+	MRampAttribute a_curl_Ramp(a_curlAttribute);
 
 	//// Overrides on output mesh
 
@@ -191,6 +195,9 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		a_twist_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
+		a_curl_Ramp.setValueAtIndex(1.0,0, &status);
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 	}
 
@@ -229,6 +236,9 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		a_twist_Ramp.setValueAtIndex(1.0,0, &status);
+		CHECK_MSTATUS_AND_RETURN_IT(status);
+
+		a_curl_Ramp.setValueAtIndex(1.0,0, &status);
 		CHECK_MSTATUS_AND_RETURN_IT(status);
 
 		// Connect time

@@ -49,6 +49,7 @@ MObject		primitiveGenerator::aStrandThinningRandomness;
 MObject		primitiveGenerator::aStrandThinningSeed;
 MObject		primitiveGenerator::aStrandCurl;
 MObject		primitiveGenerator::aStrandCurlWave;
+MObject		primitiveGenerator::aStrandCurlRamp;
 
 MObject     primitiveGenerator::aSegmentRamp;
 MObject     primitiveGenerator::aStrandOffsetRamp;
@@ -103,7 +104,11 @@ void* primitiveGenerator::creator()
 	return new primitiveGenerator();
 }
 
-void primitiveGenerator::postConstructor(){
+void primitiveGenerator::postConstructor()
+{
+
+	MStatus status;
+
 	m_init = false;
 
 	MObject oSelf = thisMObject();
@@ -112,6 +117,54 @@ void primitiveGenerator::postConstructor(){
 	MCallbackId callbackID;
 	callbackID = MNodeMessage::addNodeAboutToDeleteCallback(oSelf, aboutToDeleteCB, this);
 	m_callbackIDs.append(callbackID);
+
+	//// Check Ramp attributes for compatibility
+	//MFnDependencyNode mfDgN(oSelf);
+
+	//MPlug a_curveAttribute = mfDgN.findPlug("segmentsRamp", &status);
+	//// CHECK_MSTATUS(status);
+
+	//MPlug a_strandOffsetAttribute = mfDgN.findPlug("strandOffsetRamp", &status);
+	//// CHECK_MSTATUS(status);
+
+	//MPlug a_twistAttribute = mfDgN.findPlug("twistRamp", &status);
+	//// CHECK_MSTATUS(status);
+
+	//MPlug a_curlAttribute = mfDgN.findPlug("strandCurlRamp", &status);
+	//// CHECK_MSTATUS(status);
+
+	//MRampAttribute a_segments_Ramp(a_curveAttribute);
+	//MRampAttribute a_strandOffset_Ramp(a_strandOffsetAttribute);
+	//MRampAttribute a_twist_Ramp(a_twistAttribute);
+	//MRampAttribute a_curl_Ramp(a_curlAttribute);
+
+
+	//if (a_segments_Ramp.getNumEntries() == 0)
+	//{
+	//	a_segments_Ramp.setValueAtIndex(1.0,0, &status);
+	//	// CHECK_MSTATUS(status);
+	//}
+
+
+	//if (a_strandOffset_Ramp.getNumEntries()  == 0)
+	//{
+	//	a_strandOffset_Ramp.setValueAtIndex(1.0,0, &status);
+	//	// CHECK_MSTATUS(status);
+	//}
+
+	//if (a_twist_Ramp.getNumEntries()  == 0)
+	//{
+	//	a_twist_Ramp.setValueAtIndex(1.0,0, &status);
+	//	// CHECK_MSTATUS(status);
+	//}
+
+
+	//if (a_curl_Ramp.getNumEntries()  == 0)
+	//{
+	//	a_curl_Ramp.setValueAtIndex(1.0,0, &status);
+	//	// CHECK_MSTATUS(status);
+	//}
+
 
 }
 
@@ -590,7 +643,7 @@ MObject primitiveGenerator::generateStrips(){
 			//
 
 			double angle_extra=M_PI/180*i;
-			double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
+			double radius_addon=(m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
 
 			// radius_addon *=  (m_rndAr[s] * 0.01);
 
@@ -1594,6 +1647,12 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_twistProfileA = storeProfileCurveData(a_twistAttribute, m_segments, m_segmentsLoop);
 
+	// Ramp attribute
+	MRampAttribute a_strandCurlAttribute(this->thisMObject(), aStrandCurlRamp, &status);
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_stranCurlProfileA = storeProfileCurveData(a_strandCurlAttribute, m_segments, m_segmentsLoop);
+
+
 	//
 	m_profilePointsA.clear();
 
@@ -1833,6 +1892,9 @@ MStatus primitiveGenerator::initialize()
 
 	primitiveGenerator::aTwistRamp = rAttr.createCurveRamp("twistRamp", "twistRamp");
 	addAttribute(aTwistRamp);
+
+	primitiveGenerator::aStrandCurlRamp = rAttr.createCurveRamp("strandCurlRamp", "strandCurlRamp");
+	addAttribute(aStrandCurlRamp);
 
 	primitiveGenerator::aUseInputCurve = nAttr.create( "useInputCurve", "useInputCurve", MFnNumericData::kBoolean );
 	nAttr.setDefault( false );
@@ -2185,6 +2247,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aSegmentRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffsetRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aTwistRamp, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandCurlRamp, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandCurl, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandCurlWave, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aProfilePresets, primitiveGenerator::aOutMesh);

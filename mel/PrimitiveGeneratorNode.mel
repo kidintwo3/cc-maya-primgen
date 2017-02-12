@@ -25,12 +25,15 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 		editorTemplate -label "Strands" -addControl "strands";
 		editorTemplate -label "Strand Offset" -addControl "strandOffset";
 		editorTemplate -label "Offset Random" -addControl "strandOffsetRandom";
+		editorTemplate -addSeparator;
 		editorTemplate -label "Strand Curl" -addControl "strandCurl";
 		editorTemplate -label "Strand Curl Wave" -addControl "strandCurlWave";
+		AEaddRampControl( $nodeName + ".strandCurlRamp" );
 		editorTemplate -addSeparator;
 		editorTemplate -label "Thinning" -addControl "strandThinning";
 		editorTemplate -label "Thinning Randomness" -addControl "strandThinningRandomness";
-		editorTemplate -label "Thinning Seed" -addControl "strandThinningSeed";
+		editorTemplate -addSeparator;
+		editorTemplate -label "Random Seed" -addControl "strandThinningSeed";
 		AEaddRampControl( $nodeName + ".strandOffsetRamp" );
     editorTemplate -endLayout;
 	

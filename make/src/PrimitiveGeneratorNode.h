@@ -130,6 +130,7 @@ public:
 	static MObject      aStrandThinningSeed;
 	static MObject		aStrandCurl;
 	static MObject		aStrandCurlWave;
+	
 
 	static MObject      aInLocAPos;
 	static MObject      aInLocBPos;
@@ -143,6 +144,7 @@ public:
 	static MObject		aSegmentRamp;
 	static MObject		aStrandOffsetRamp;
 	static MObject		aTwistRamp;
+	static MObject		aStrandCurlRamp;
 
 
 	// UV
@@ -177,6 +179,7 @@ private:
 	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop, m_strandThinningSeed;
 	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V;
 	short				m_profilePreset;
+
 	MVector				m_firstUpVec;
 	MObject				m_o_curve;
 	MObject				m_o_curve_ref;
@@ -190,6 +193,7 @@ private:
 	MFloatArray			m_segmentsProfileA;
 	MFloatArray			m_strandOffsetProfileA;
 	MFloatArray			m_twistProfileA;
+	MFloatArray			m_stranCurlProfileA;
 
 	MPoint				m_inLocA_pos;
 	MPoint				m_inLocB_pos;
