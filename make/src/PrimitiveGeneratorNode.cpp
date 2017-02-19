@@ -656,20 +656,18 @@ MObject primitiveGenerator::generateStrips(){
 
 			//
 
+						trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
+			trM.setScale(scale,MSpace::kObject);
+
 			trM.addTranslation(MVector(0.0,x,z),MSpace::kObject);
 			trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-
+			
 			//
 
 
-			trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-			trM.setScale(scale,MSpace::kObject);
+
 
 			double rad = m_r;
-
-
-
-
 
 
 			rad *= m_segmentsProfileA[i];
@@ -886,6 +884,17 @@ MObject primitiveGenerator::generateTubes()
 
 	MPointArray pA;
 
+	
+	// Generate random offset array
+	MDoubleArray rndOffAr;
+	rndOffAr.setLength(m_numstrands);
+
+	for (int i = 0; i < rndOffAr.length(); i++)
+	{
+		rndOffAr[i] = rand() % 100;
+	}
+
+
 	int num_verts = 0;
 	double x,z;
 	double deg = 360.0 / double(m_sides);
@@ -927,15 +936,26 @@ MObject primitiveGenerator::generateTubes()
 
 					double scale[3] = {1.0,m_width,m_height};
 					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
-					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+
+
+					double mult = rndOffAr[s] * 0.01;
+					mult += (1.0-m_strandOffsetRandom);
+
+					if (mult>1.0)
+					{
+						mult = 1.0;
+					}
+
+					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
+					// double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
 
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 
-
+					trM.setScale(scale,MSpace::kObject);
 
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-					trM.setScale(scale,MSpace::kObject);
+					
 
 
 					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
@@ -970,7 +990,19 @@ MObject primitiveGenerator::generateTubes()
 
 					double scale[3] = {1.0,m_width,m_height};
 					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
-					double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+
+
+					double mult = rndOffAr[s] * 0.01;
+					mult += (1.0-m_strandOffsetRandom);
+
+					if (mult>1.0)
+					{
+						mult = 1.0;
+					}
+
+					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
+
+	/*				double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);*/
 
 
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
