@@ -90,6 +90,7 @@ public:
 
 	static void			aboutToDeleteCB( MObject& node, MDGModifier& modifier, void* clientData );
 
+
 	static MTypeId      id;
 
 	static MObject		aOutMesh;
@@ -220,6 +221,7 @@ private:
 	MCallbackIdArray	m_callbackIDs;
 
 	std::vector<MMatrixArray> trMatrixA_vec;
+
 
 };
 

@@ -86,7 +86,6 @@ MObject     primitiveGenerator::aStiffness;
 //
 
 
-
 primitiveGenerator::primitiveGenerator() 
 {
 
@@ -104,6 +103,7 @@ void* primitiveGenerator::creator()
 	return new primitiveGenerator();
 }
 
+
 void primitiveGenerator::postConstructor()
 {
 
@@ -117,6 +117,10 @@ void primitiveGenerator::postConstructor()
 	MCallbackId callbackID;
 	callbackID = MNodeMessage::addNodeAboutToDeleteCallback(oSelf, aboutToDeleteCB, this);
 	m_callbackIDs.append(callbackID);
+
+
+
+
 
 	//// Check Ramp attributes for compatibility
 	//MFnDependencyNode mfDgN(oSelf);
@@ -169,6 +173,8 @@ void primitiveGenerator::postConstructor()
 }
 
 // -------------------------------------------------
+
+
 
 void primitiveGenerator::aboutToDeleteCB(MObject& node, MDGModifier& modifier, void* pUserPtr) 
 {
@@ -656,12 +662,12 @@ MObject primitiveGenerator::generateStrips(){
 
 			//
 
-						trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
+			trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
 			trM.setScale(scale,MSpace::kObject);
 
 			trM.addTranslation(MVector(0.0,x,z),MSpace::kObject);
 			trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-			
+
 			//
 
 
@@ -884,7 +890,7 @@ MObject primitiveGenerator::generateTubes()
 
 	MPointArray pA;
 
-	
+
 	// Generate random offset array
 	MDoubleArray rndOffAr;
 	rndOffAr.setLength(m_numstrands);
@@ -955,7 +961,7 @@ MObject primitiveGenerator::generateTubes()
 					trM.setScale(scale,MSpace::kObject);
 
 					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-					
+
 
 
 					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
@@ -1002,7 +1008,7 @@ MObject primitiveGenerator::generateTubes()
 
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
 
-	/*				double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);*/
+					/*				double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);*/
 
 
 					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
