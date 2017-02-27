@@ -22,7 +22,12 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
     editorTemplate -endLayout;
 	
 	editorTemplate -beginLayout "Strands" -collapse 0;
+		editorTemplate -addControl "strandPresets";
+		editorTemplate -addSeparator;
 		editorTemplate -label "Strands" -addControl "strands";
+		editorTemplate -label "Width" -addControl "strandWidth";
+		editorTemplate -label "Height" -addControl "strandHeight";
+		editorTemplate -addSeparator;
 		editorTemplate -label "Strand Offset" -addControl "strandOffset";
 		editorTemplate -label "Offset Random" -addControl "strandOffsetRandom";
 		editorTemplate -addSeparator;
@@ -39,6 +44,7 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
 	
 	editorTemplate -beginLayout "Segments Translation" -collapse 0;
 		editorTemplate -label "Rotation" -addControl "rotate";
+		editorTemplate -label "Random Rotation" -addControl "strandRotationRandom";
 		editorTemplate -label "Twist" -addControl "twist";
 		editorTemplate -label "Offset curve normal" -addControl "curveZOffset";
 		AEaddRampControl( $nodeName + ".twistRamp" );

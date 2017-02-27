@@ -12,51 +12,65 @@
 #include "PrimitiveGeneratorCommand.h"
 #include "AETemplate.h"
 #include "icons.h"
-#include "LicCheck.h"
+//#include "LicCheck.h"
 
 
 #include <maya/MFnPlugin.h>
+#include <maya/MCommonSystemUtils.h>
 
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "1.87", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "2.0 beta for Capcom", "Any");
 
 
-	// Licence Check
+	//bool check_lic = false;
 
-	MString plugin_name = "PrimGen";
+	//// Licence Check
 
-	MString lic_key = MString(std::getenv("PRIMGEN_LICENSE_KEY"));
-
-	if (!checkLic(lic_key))
-	{
-		MGlobal::displayInfo( "--------------------------------------------");
-		MGlobal::displayInfo("["+plugin_name+"] No licence found!");
-		MGlobal::displayInfo( "Make sure the Maya.env file has your licence");
-		MGlobal::displayInfo( "--------------------------------------------");
-
-		MGlobal::executeCommand("inViewMessage -smg \"["+plugin_name+"] No licence found!\" -pos midCenter -bkc 0x00750000 -fade;");
-
-		return MStatus::kFailure;
-
-	} 
-
-	else
-	{
-		MGlobal::displayInfo("["+plugin_name+"] Licence found!");
-	}
+	//if (check_lic)
+	//{
 
 
+
+	//	MString plugin_name = "PrimGen";
+
+	//	// MString lic_key = MString(std::getenv("PRIMGEN_LICENSE_KEY"));
+	//	MString lic_key = "D0F9F4D8-50FD4FE3-A411C173-FB6C77C7";
+
+	//	if (!checkLic(lic_key))
+	//	{
+	//		MGlobal::displayInfo( "--------------------------------------------");
+	//		MGlobal::displayInfo("["+plugin_name+"] No licence found!");
+	//		MGlobal::displayInfo( "Make sure the Maya.env file has your licence");
+	//		MGlobal::displayInfo( "--------------------------------------------");
+
+	//		MGlobal::executeCommand("inViewMessage -smg \"["+plugin_name+"] No licence found!\" -pos midCenter -bkc 0x00750000 -fade;");
+
+	//		return MStatus::kFailure;
+
+	//	} 
+
+	//	else
+	//	{
+	//		MGlobal::displayInfo("["+plugin_name+"] Licence found!");
+	//	}
+
+
+	//}
 
 	// Icon / UI rebuild check
 
-	if( !std::getenv("PRIMGEN_REBUILD_ICONS") )
+	MString rebuild_icons = MCommonSystemUtils::getEnv("PRIMGEN_REBUILD_ICONS", &status);
+
+	if( !rebuild_icons.asShort() )
 	{
 		icons_data_write();
 	}
 
-	if( !std::getenv("PRIMGEN_REBUILD_SHELF") )
+	MString rebuild_shelf = MCommonSystemUtils::getEnv("PRIMGEN_REBUILD_SHELF", &status);
+
+	if( !rebuild_shelf.asShort() )
 	{
 		MGlobal::executeCommand( mel_createShelf() );
 	}

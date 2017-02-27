@@ -100,6 +100,8 @@ public:
 	static MObject      aRadius;
 	static MObject		aWidth;
 	static MObject		aHeight;
+	static MObject		aStrandWidth;
+	static MObject		aStrandHeight;
 	static MObject      aRotate;
 	static MObject      aTwist;
 
@@ -117,6 +119,7 @@ public:
 
 
 	static MObject		aProfilePresets;
+	static MObject		aStrandPresets;
 
 	static MObject      aAutoSegments;
 	static MObject      aAutoSegmentsRes;
@@ -126,6 +129,7 @@ public:
 
 	static MObject      aStrandOffset;
 	static MObject      aStrandOffsetRandom;
+	static MObject		aRotationRandom;
 	static MObject      aStrandThinning;
 	static MObject      aStrandThinningRandomness;
 	static MObject      aStrandThinningSeed;
@@ -175,11 +179,11 @@ public:
 
 private:
 
-	double				m_r, m_width, m_height,  m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
+	double				m_r, m_width, m_height, m_strandWidth, m_strandHeight, m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_rotationRandom, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
 	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop, m_strandThinningSeed;
 	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V;
-	short				m_profilePreset;
+	short				m_profilePreset, m_strandPreset;
 
 	MVector				m_firstUpVec;
 	MObject				m_o_curve;

@@ -16,6 +16,8 @@ MObject     primitiveGenerator::aRefCurve;
 MObject     primitiveGenerator::aRadius;
 MObject     primitiveGenerator::aWidth;
 MObject     primitiveGenerator::aHeight;
+MObject     primitiveGenerator::aStrandWidth;
+MObject     primitiveGenerator::aStrandHeight;
 MObject     primitiveGenerator::aRotate;
 MObject     primitiveGenerator::aTwist;
 MObject     primitiveGenerator::aSides;
@@ -32,6 +34,7 @@ MObject     primitiveGenerator::aAutoSegmentsRes;
 MObject     primitiveGenerator::aOnlyKnotSegmentsRes;
 
 MObject		primitiveGenerator::aProfilePresets;
+MObject		primitiveGenerator::aStrandPresets;
 
 MObject     primitiveGenerator::aInLocAPos;
 MObject     primitiveGenerator::aInLocBPos;
@@ -44,6 +47,7 @@ MObject     primitiveGenerator::aFirstUpVecZ;
 MObject		primitiveGenerator::aCurveZOffset;
 MObject		primitiveGenerator::aStrandOffset;
 MObject		primitiveGenerator::aStrandOffsetRandom;
+MObject		primitiveGenerator::aRotationRandom;
 MObject		primitiveGenerator::aStrandThinning;
 MObject		primitiveGenerator::aStrandThinningRandomness;
 MObject		primitiveGenerator::aStrandThinningSeed;
@@ -222,7 +226,7 @@ MFloatArray primitiveGenerator::storeProfileCurveData(MRampAttribute a_segmentsA
 
 	for (int i = 0; i < segments+1; i++)
 	{
-		float rampPosition = (1.0f / float(segments)) * float(i);
+		float rampPosition = (1.0f / float(segments+1)) * float(i);
 		float curveRampValue;
 		a_segmentsAttribute.getValueAtPosition(rampPosition, curveRampValue, &status);
 		CHECK_MSTATUS(status);
@@ -257,7 +261,7 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 	m_rndAr.clear();
 	m_rndAr.setLength(m_numstrands);
 
-	for (int i = 0; i < m_rndAr.length(); i++)
+	for (int i = 0; i < m_numstrands; i++)
 	{
 		m_rndAr[i] = rand() % 100;
 		// m_rndAr[i] *= 1.0-m_trandThinningRandomness;
@@ -612,24 +616,26 @@ MObject primitiveGenerator::generateStrips(){
 	}
 
 
+
+
 	// Generate strands
 	for (int s=0; s < m_numstrands; s++) 
 	{
+
+		double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+		double strand_rot = ((360.0 / m_numstrands) * double(s)) / 180.0 * M_PI;
+		double local_rot = m_rotate / 180.0 * M_PI;
+
 
 		for (int i=0; i < m_segments+1; i++) 
 		{
 
 
-			double angleRot = m_rotate / 180.0 * M_PI;
-			//angleRot += m_twist*i / double(m_segments);
-			angleRot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
+			double angle_extra=M_PI/180*i;
+			local_rot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
 
 			MTransformationMatrix trM(trMatrixA[s][i]);
-			double scale[3] = {1.0,m_width,0.0};
 
-
-
-			//
 
 			double mult = rndOffAr[s] * 0.01;
 			mult += (1.0-m_strandOffsetRandom);
@@ -639,51 +645,82 @@ MObject primitiveGenerator::generateStrips(){
 				mult = 1.0;
 			}
 
-			double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
 			double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
+			double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
 
-			trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
 
+
+			if (m_strandPreset == 0)
+			{
+				offset_extra *=  (m_rndAr[s] * 0.01);
+
+				double x  = cos( dag ) * (strand_offset * m_strandWidth);
+				double z  = sin( dag ) * (strand_offset * m_strandHeight);
+
+				x += offset_extra;
+				z += offset_extra;
+
+				trM.addTranslation(MVector(0.0, x, z),MSpace::kObject);
+				trM.rotateBy(MEulerRotation(strand_rot + local_rot,0.0,0.0),MSpace::kObject);
+			}
+
+
+			if (m_strandPreset == 1)
+			{
+
+				// X
+
+				double x = 0.0;
+				double z = 0.0;
+
+				if (m_numstrands-1 != 0)
+				{
+					x = (strand_offset / double(m_numstrands-1) * double(s)) - strand_offset * 0.5;
+				}
+
+
+				x *= 2.0;
+				x *= m_strandWidth;
+				x += offset_extra;
+
+				// Z
+
+				z = (strand_offset * (m_rndAr[s]* 0.01))- strand_offset * 0.5;
+				z *= 2.0;
+				z *= m_strandHeight;
+				z += offset_extra;
+
+				// Add back
+
+				double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
+				rnd_rot_mult *= M_PI/180;
+
+
+				trM.addTranslation(MVector(0.0, x, z),MSpace::kObject);
+				trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult,0.0,0.0),MSpace::kObject);
+			}
 
 
 			//
-
-			double angle_extra=M_PI/180*i;
-			double radius_addon=(m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
-
-			// radius_addon *=  (m_rndAr[s] * 0.01);
-
-			double x= (radius_addon) * cos(angle_extra);
-			double z= (radius_addon) * sin(angle_extra);
-
-
-			x *= m_segmentsProfileA[i];
-			z *= m_segmentsProfileA[i];
-
-			//
-
-			trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-			trM.setScale(scale,MSpace::kObject);
-
-			trM.addTranslation(MVector(0.0,x,z),MSpace::kObject);
-			trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-
-			//
-
-
 
 
 			double rad = m_r;
 
 
+
+
 			rad *= m_segmentsProfileA[i];
 
 
+			double p1_x = -rad * m_width;
+			double p2_x =  rad * m_width;
+
+			p1_x *= m_segmentsProfileA[i];
+			p2_x *= m_segmentsProfileA[i];
 
 
-
-			MPoint p1 = MPoint( 0.0, -rad, 0.0 );
-			MPoint p2 = MPoint( 0.0,  rad, 0.0 );
+			MPoint p1 = MPoint( 0.0, p1_x, 0.0 );
+			MPoint p2 = MPoint( 0.0, p2_x, 0.0 );
 
 
 
@@ -908,14 +945,21 @@ MObject primitiveGenerator::generateTubes()
 	for (int s=0; s < m_numstrands; s++) 
 	{
 
+
+		double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+		double strand_rot = ((360.0 / m_numstrands) * double(s)) / 180.0 * M_PI;
+		double local_rot = m_rotate / 180.0 * M_PI;
+
+
 		for (int i=0; i < m_segments+1; i++) 
 		{
 
-			for (int j=0; j< m_sides; j++) {
+			for (int j=0; j< m_sides; j++) 
+			{
 
 				double angle = deg * j / 180.0  * M_PI;
 				double angleRot = m_rotate / 180.0 * M_PI;
-				// angleRot += m_twist*i / double(m_segments);
+
 				angleRot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
 
 				if (m_useProfile)
@@ -924,25 +968,30 @@ MObject primitiveGenerator::generateTubes()
 					z = m_profilePointsA[j].z * m_r;
 
 
-					//
+
+
+
+					// Initial values
 
 					double angle_extra=M_PI/180*i;
-					double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
-					x += (radius_addon) * cos(angle_extra);
-					z += (radius_addon) * sin(angle_extra);
 
-					//
+					// Calculate tube based on profiles
 
+					x = m_profilePointsA[j].x * (m_r * m_width);
+					z = m_profilePointsA[j].z * (m_r * m_height);
 
 					x *= m_segmentsProfileA[i];
 					z *= m_segmentsProfileA[i];
 
+
 					MPoint pnt( 0.0, x, z );
+
+
+					// Calculate transform
+
 					MTransformationMatrix trM(trMatrixA[s][i]);
 
-					double scale[3] = {1.0,m_width,m_height};
-					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
-
+					local_rot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
 
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0-m_strandOffsetRandom);
@@ -952,51 +1001,53 @@ MObject primitiveGenerator::generateTubes()
 						mult = 1.0;
 					}
 
+
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
-					// double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);
+					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+					offset_extra *=  (m_rndAr[s] * 0.01);
 
-					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+					double x  = cos( dag ) * (strand_offset * m_strandWidth);
+					double z  = sin( dag ) * (strand_offset * m_strandHeight);
 
-					trM.setScale(scale,MSpace::kObject);
+					x += offset_extra;
+					z += offset_extra;
 
-					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
+					trM.addTranslation(MVector(0.0, x, z),MSpace::kObject);
+					trM.rotateBy(MEulerRotation(strand_rot + local_rot,0.0,0.0),MSpace::kObject);
 
-
+					// Pipe back point array
 
 					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
-					pA.append(outP );
+					pA.append( outP );
+
 
 				}
 
 				if (!m_useProfile)
 				{
 
-					x  = cos( angle ) * m_r;
-					z  = sin( angle ) * m_r;
 
-
-					//
+					// Initial values
 
 					double angle_extra=M_PI/180*i;
-					double radius_addon=m_strandCurl*sin(angle_extra*m_strandCurlWave);
-					x += (radius_addon) * cos(angle_extra);
-					z += (radius_addon) * sin(angle_extra);
 
-					//
+					// Calculate tube circle
 
+					x  = cos( angle ) * (m_r * m_width);
+					z  = sin( angle ) * (m_r * m_height);
 
 					x *= m_segmentsProfileA[i];
 					z *= m_segmentsProfileA[i];
 
 
-
 					MPoint pnt( 0.0, x, z );
+
+
+					// Calculate transform
+
 					MTransformationMatrix trM(trMatrixA[s][i]);
 
-					double scale[3] = {1.0,m_width,m_height};
-					double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
-
+					local_rot += (m_twistProfileA[i]*i / double(m_segments))*m_twist;
 
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0-m_strandOffsetRandom);
@@ -1006,22 +1057,25 @@ MObject primitiveGenerator::generateTubes()
 						mult = 1.0;
 					}
 
+
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
+					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+					offset_extra *=  (m_rndAr[s] * 0.01);
 
-					/*				double strand_offset = (m_strandOffsetProfileA[i]*m_strandOffset);*/
+					double x  = cos( dag ) * (strand_offset * m_strandWidth);
+					double z  = sin( dag ) * (strand_offset * m_strandHeight);
 
+					x += offset_extra;
+					z += offset_extra;
 
-					trM.rotateBy(MEulerRotation(angleRot,0.0,0.0),MSpace::kObject);
-					trM.rotateBy(MEulerRotation(dag,0.0,0.0),MSpace::kObject);
+					trM.addTranslation(MVector(0.0, x, z),MSpace::kObject);
+					trM.rotateBy(MEulerRotation(strand_rot + local_rot,0.0,0.0),MSpace::kObject);
 
-
-
-					trM.addTranslation(MVector(0.0,strand_offset,0.0),MSpace::kObject);
-					trM.setScale(scale,MSpace::kObject);
-
+					// Pipe back point array
 
 					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
 					pA.append( outP );
+
 
 				}
 
@@ -1517,6 +1571,10 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_height				= data.inputValue( aHeight, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandWidth			= data.inputValue( aStrandWidth, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandHeight			= data.inputValue( aStrandHeight, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_rotate				= data.inputValue( aRotate, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_twist					= data.inputValue( aTwist, &status ).asDouble();
@@ -1526,6 +1584,8 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	m_strandOffset			= data.inputValue( aStrandOffset, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandOffsetRandom	= data.inputValue( aStrandOffsetRandom, &status ).asDouble();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_rotationRandom	= data.inputValue( aRotationRandom, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandCurl			= data.inputValue( aStrandCurl, &status ).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -1558,6 +1618,8 @@ MStatus primitiveGenerator::compute( const MPlug& plug, MDataBlock& data )
 	m_alingToUpVector		= data.inputValue( aAlingToUpVector, &status ).asBool();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_profilePreset			= data.inputValue(aProfilePresets, &status).asShort();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_strandPreset			= data.inputValue(aStrandPresets, &status).asShort();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_firstUpVec			= data.inputValue(aFirstUpVec, &status).asVector();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -1831,6 +1893,14 @@ MStatus primitiveGenerator::initialize()
 	eAttr.setDefault(1);
 	addAttribute( primitiveGenerator::aProfilePresets );
 
+	primitiveGenerator::aStrandPresets = eAttr.create( "strandPresets", "strandPresets", 0);
+	eAttr.setStorable(true);
+	eAttr.addField("Circular", 0);
+	eAttr.addField("Plane", 1);
+
+	eAttr.setDefault(0);
+	addAttribute( primitiveGenerator::aStrandPresets );
+
 	primitiveGenerator::aRadius = nAttr.create( "radius", "radius", MFnNumericData::kDouble );
 	nAttr.setDefault( 1.0 );
 	nAttr.setMin(0.0);
@@ -1857,6 +1927,24 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aHeight );
+
+	primitiveGenerator::aStrandWidth = nAttr.create( "strandWidth", "strandWidth", MFnNumericData::kDouble );
+	nAttr.setDefault( 1.0 );
+	nAttr.setMin(0.0);
+	nAttr.setSoftMax(10.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandWidth );
+
+	primitiveGenerator::aStrandHeight = nAttr.create( "strandHeight", "strandHeight", MFnNumericData::kDouble );
+	nAttr.setDefault( 1.0 );
+	nAttr.setMin(0.0);
+	nAttr.setSoftMax(10.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aStrandHeight );
 
 
 	primitiveGenerator::aRotate = nAttr.create( "rotate", "rotate", MFnNumericData::kDouble );
@@ -2011,6 +2099,15 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setChannelBox( true );
 	nAttr.setHidden(false);
 	addAttribute( primitiveGenerator::aStrandOffsetRandom );
+
+	primitiveGenerator::aRotationRandom = nAttr.create( "rotationRandom", "rotationRandom", MFnNumericData::kDouble );
+	nAttr.setDefault( 0.0 );
+	nAttr.setMin(0.0);
+	nAttr.setMax(1.0);
+	nAttr.setKeyable( true );
+	nAttr.setChannelBox( true );
+	nAttr.setHidden(false);
+	addAttribute( primitiveGenerator::aRotationRandom );
 
 
 	primitiveGenerator::aStrandThinning = nAttr.create( "strandThinning", "strandThinning", MFnNumericData::kDouble );
@@ -2256,6 +2353,8 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aRadius, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aWidth, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aHeight, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandWidth, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandHeight, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aRotate, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aTwist, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSides, primitiveGenerator::aOutMesh);
@@ -2279,6 +2378,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aCurveZOffset, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffset, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffsetRandom, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aRotationRandom, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinning, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinningRandomness, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinningSeed, primitiveGenerator::aOutMesh);
@@ -2289,6 +2389,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aStrandCurl, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandCurlWave, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aProfilePresets, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aStrandPresets, primitiveGenerator::aOutMesh);
 
 	// Override
 	attributeAffects(primitiveGenerator::aDisableBaseMeshOverride, primitiveGenerator::aOutMesh);
