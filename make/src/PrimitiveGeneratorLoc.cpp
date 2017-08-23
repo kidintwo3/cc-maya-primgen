@@ -44,6 +44,7 @@ MStatus PrimitiveGeneratorLoc::compute( const MPlug& plug, MDataBlock& data )
 }
 
 
+
 void PrimitiveGeneratorLoc::draw( M3dView & view, const MDagPath & path, M3dView::DisplayStyle style,  M3dView::DisplayStatus status )
 {
 
@@ -131,8 +132,9 @@ MBoundingBox PrimitiveGeneratorLoc::boundingBox() const
 
 	MFnDependencyNode fnDepLocNode( thisMObject() );
 
-	MPoint corner1( -1.0, 1.0, -1.0 );
-	MPoint corner2( 1.0, 0.0, 1.0 );
+	MPoint corner1(-0.1, 0.0, -0.1);
+	MPoint corner2(0.1, 0.0, 0.1);
+
 	return MBoundingBox( corner1, corner2 );
 
 
@@ -144,6 +146,11 @@ MBoundingBox PrimitiveGeneratorLoc::boundingBox() const
 // ----------------------------------------------------------------------------------------------------------------------------------------------------
 
 // VP 2.0 Override functions
+
+bool PrimitiveGeneratorLocOverride::excludedFromPostEffects() const
+{
+	return true;
+}
 
 MHWRender::DrawAPI PrimitiveGeneratorLocOverride::supportedDrawAPIs() const
 {
@@ -171,8 +178,8 @@ MBoundingBox PrimitiveGeneratorLocOverride::boundingBox( const MDagPath& objPath
 	MObject CLonerMultiNode = objPath.node(&status);
 
 
-	MPoint corner1( -1.0, 1.0, -1.0 );
-	MPoint corner2( 1.0, 0.0, 1.0 );
+	MPoint corner1(-0.1, 0.0, -0.1);
+	MPoint corner2(0.1, 0.0, 0.1);
 
 	return MBoundingBox( corner1, corner2 );
 
