@@ -9,6 +9,8 @@
 #ifndef hairDrawTool_PrimitiveGenerator_h
 #define hairDrawTool_PrimitiveGenerator_h
 
+//#include <maya/MCppCompat.h>
+
 #include <maya/MPxNode.h>
 
 #include <maya/MFnNumericAttribute.h>

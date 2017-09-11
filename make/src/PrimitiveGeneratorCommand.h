@@ -1,6 +1,8 @@
 #ifndef PRIMITIVEGENDCOMMAND_H
 #define PRIMITIVEGENDCOMMAND_H
 
+//#include <maya/MCppCompat.h>
+
 #ifdef __linux__
 #include <maya/MArgDatabase.h>
 #else

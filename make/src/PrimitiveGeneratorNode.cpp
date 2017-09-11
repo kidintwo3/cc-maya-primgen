@@ -1004,19 +1004,66 @@ MObject primitiveGenerator::generateTubes()
 
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
 					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
-					offset_extra *=  (m_rndAr[s] * 0.01);
 
-					double x  = cos( dag ) * (strand_offset * m_strandWidth);
-					double z  = sin( dag ) * (strand_offset * m_strandHeight);
+					if (m_strandPreset == 0)
+					{
 
-					x += offset_extra;
-					z += offset_extra;
+						
+						offset_extra *= (m_rndAr[s] * 0.01);
 
-					trM.addTranslation(MVector(0.0, x, z),MSpace::kObject);
-					trM.rotateBy(MEulerRotation(strand_rot + local_rot,0.0,0.0),MSpace::kObject);
+						double x = cos(dag) * (strand_offset * m_strandWidth);
+						double z = sin(dag) * (strand_offset * m_strandHeight);
+
+						x += offset_extra;
+						z += offset_extra;
+
+						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(strand_rot + local_rot, 0.0, 0.0), MSpace::kObject);
+					}
+
+
+					//
+
+					if (m_strandPreset == 1)
+					{
+
+						// X
+
+						double x = 0.0;
+						double z = 0.0;
+
+						if (m_numstrands - 1 != 0)
+						{
+							x = (strand_offset / double(m_numstrands - 1) * double(s)) - strand_offset * 0.5;
+						}
+
+
+						x *= 2.0;
+						x *= m_strandWidth;
+						x += offset_extra;
+
+						// Z
+
+						z = (strand_offset * (m_rndAr[s] * 0.01)) - strand_offset * 0.5;
+						z *= 2.0;
+						z *= m_strandHeight;
+						z += offset_extra;
+
+						// Add back
+
+						double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
+						rnd_rot_mult *= M_PI / 180;
+
+
+						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult, 0.0, 0.0), MSpace::kObject);
+					}
+
+
+
+
 
 					// Pipe back point array
-
 					MFloatPoint outP = MFloatPoint( (pnt * trM.asMatrix()));
 					pA.append( outP );
 
@@ -1060,16 +1107,62 @@ MObject primitiveGenerator::generateTubes()
 
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
 					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
-					offset_extra *=  (m_rndAr[s] * 0.01);
 
-					double x  = cos( dag ) * (strand_offset * m_strandWidth);
-					double z  = sin( dag ) * (strand_offset * m_strandHeight);
+					if (m_strandPreset == 0)
+					{
 
-					x += offset_extra;
-					z += offset_extra;
 
-					trM.addTranslation(MVector(0.0, x, z),MSpace::kObject);
-					trM.rotateBy(MEulerRotation(strand_rot + local_rot,0.0,0.0),MSpace::kObject);
+						offset_extra *= (m_rndAr[s] * 0.01);
+
+						double x = cos(dag) * (strand_offset * m_strandWidth);
+						double z = sin(dag) * (strand_offset * m_strandHeight);
+
+						x += offset_extra;
+						z += offset_extra;
+
+						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(strand_rot + local_rot, 0.0, 0.0), MSpace::kObject);
+					}
+
+
+					if (m_strandPreset == 1)
+					{
+
+						// X
+
+						double x = 0.0;
+						double z = 0.0;
+
+						if (m_numstrands - 1 != 0)
+						{
+							x = (strand_offset / double(m_numstrands - 1) * double(s)) - strand_offset * 0.5;
+						}
+
+
+						x *= 2.0;
+						x *= m_strandWidth;
+						x += offset_extra;
+
+						// Z
+
+						z = (strand_offset * (m_rndAr[s] * 0.01)) - strand_offset * 0.5;
+						z *= 2.0;
+						z *= m_strandHeight;
+						z += offset_extra;
+
+						// Add back
+
+						double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
+						rnd_rot_mult *= M_PI / 180;
+
+
+						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult, 0.0, 0.0), MSpace::kObject);
+					}
+
+
+
+
 
 					// Pipe back point array
 

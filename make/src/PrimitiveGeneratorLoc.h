@@ -9,6 +9,8 @@
 #ifndef PrimitiveGeneratorLoc_H
 #define PrimitiveGeneratorLoc_H
 
+//#include <maya/MCppCompat.h>
+
 #include <maya/MPxLocatorNode.h>
 #include <maya/M3dView.h>
 #include <maya/MGlobal.h>

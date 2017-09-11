@@ -9,7 +9,8 @@
 #ifndef DAGUTILS_H
 #define DAGUTILS_H
 
-//#include <stdio.h>
+
+//#include <maya/MCppCompat.h>
 #include <maya/MSelectionList.h>
 #include <maya/MItSelectionList.h>
 #include <maya/MItDag.h>

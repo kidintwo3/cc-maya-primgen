@@ -6,7 +6,7 @@
 //  Copyright (c) 2014. Janos Hunyadi. All rights reserved.
 //
 
-
+//#include <maya/MCppCompat.h>
 #include "PrimitiveGeneratorNode.h"
 #include "PrimitiveGeneratorLoc.h"
 #include "PrimitiveGeneratorCommand.h"
@@ -21,7 +21,7 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "2.0 beta for Capcom", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "2.0 beta for Walt Disney Animation Studios", "Any");
 
 
 	//bool check_lic = false;
