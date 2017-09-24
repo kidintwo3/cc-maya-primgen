@@ -646,7 +646,14 @@ MObject primitiveGenerator::generateStrips(){
 			}
 
 			double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
+
+			//m_strandCurlWave *=
+
+			//double temp_strandCurlWave = m_strandCurlWave
+
 			double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+
+			/*offset_extra /= m_segments;*/
 
 
 

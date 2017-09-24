@@ -34,19 +34,20 @@
 class primitiveGeneratorCommand : public MPxCommand
 {
 public:
-    primitiveGeneratorCommand();
-    virtual MStatus doIt( const MArgList& argList );
-    virtual MStatus redoIt();
-    virtual MStatus undoIt();
-    virtual bool isUndoable() const;
-    static void* creator();
-    static MSyntax newSyntax();
+	primitiveGeneratorCommand();
+	virtual MStatus doIt(const MArgList& argList);
+	virtual MStatus redoIt();
+	virtual MStatus undoIt();
+	virtual bool isUndoable() const;
+	static void* creator();
+	static MSyntax newSyntax();
 
-	
+
 
 private:
 
 	MStatus createPrimGenFromCurves(MDagPathArray p_currSelTrA, MDagPathArray p_currSelShapeA);
+	MStatus createPrimGenDuplicate(MDagPathArray p_currSelTrA, MDagPathArray p_currSelShapeA);
 	MStatus createPrimGenFromLocators();
 
 	MDagModifier m_DAGMod;
@@ -59,8 +60,9 @@ private:
 	MObject		 o_locB;
 
 	bool		m_muscle;
+	bool		m_duplicate;
 
-	
+
 
 };
 

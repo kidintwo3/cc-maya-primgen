@@ -21,7 +21,7 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "2.0 beta for Walt Disney Animation Studios", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "2.0", "Any");
 
 
 	//bool check_lic = false;
