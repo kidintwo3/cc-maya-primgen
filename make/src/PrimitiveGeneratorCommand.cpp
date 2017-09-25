@@ -89,7 +89,7 @@ MStatus primitiveGeneratorCommand::createPrimGenDuplicate(MDagPathArray p_currSe
 
 				MPlug destPlug = destPlugs[z];
 				MFnDependencyNode depN(destPlug.node());
-				
+
 
 
 				// Check if a plugin node is connected
@@ -98,11 +98,11 @@ MStatus primitiveGeneratorCommand::createPrimGenDuplicate(MDagPathArray p_currSe
 					// Check if the connected plugin is a PrimitiveGenerator
 					if (depN.typeId() == 0x00123941)
 					{
-						
+
 						//MFnDagNode depN(destPlug.node());
 						//MObject parent_tr = depN.parent(0, &status);
 						//MFnDagNode  dgggg(parent_tr);
-						
+
 
 						MObject outMeshAttr = depN.attribute("outMesh", &status);
 						CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -138,7 +138,7 @@ MStatus primitiveGeneratorCommand::createPrimGenDuplicate(MDagPathArray p_currSe
 								//dgggg.duplicate(false, false, &status);
 								//CHECK_MSTATUS_AND_RETURN_IT(status);
 
-								
+
 
 							}
 
@@ -213,11 +213,11 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		MFnNurbsCurve mFnC(p_currSelShapeA[i]);
 		// MGlobal::displayInfo(MString() + mFnC.length() );
 
-		//		int i_curveLength = int(mFnC.length());
+		double d_curveLength = int(mFnC.length());
 
 		setPlugs(o_primGenNode, "segments", "50");
 		setPlugs(o_primGenNode, "profilePresets", "0");
-		setPlugs(o_primGenNode, "radius", "0.5");
+		setPlugs(o_primGenNode, "radius",  MString() + d_curveLength * 0.02);
 		setPlugs(o_primGenNode, "sides", "8");
 
 		MFnDependencyNode mfDgN(o_primGenNode);

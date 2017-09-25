@@ -27,7 +27,9 @@
 *.app
 
 # Make files
+!*.vcxproj
 /make/build/*
+
 
 # =========================
 # Operating System Files
