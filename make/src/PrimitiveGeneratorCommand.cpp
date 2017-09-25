@@ -334,7 +334,7 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 
 		setPlugs(o_primGenNode, "segments", "20");
 		setPlugs(o_primGenNode, "profilePresets", "0");
-		setPlugs(o_primGenNode, "radius", "0.5");
+		setPlugs(o_primGenNode, "radius", MString() + d_curveLength * 0.02);
 		setPlugs(o_primGenNode, "sides", "20");
 		setPlugs(o_primGenNode, "jiggleEnabled", "false");
 
