@@ -213,7 +213,7 @@ MStatus primitiveGeneratorCommand::createPrimGenFromCurves(MDagPathArray p_currS
 		MFnNurbsCurve mFnC(p_currSelShapeA[i]);
 		// MGlobal::displayInfo(MString() + mFnC.length() );
 
-		double d_curveLength = int(mFnC.length());
+		double d_curveLength = mFnC.length();
 
 		setPlugs(o_primGenNode, "segments", "50");
 		setPlugs(o_primGenNode, "profilePresets", "0");
@@ -327,14 +327,12 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 	//p_overrideEnabled.setBool(true);
 	//p_overrideDisplayType.setInt(2);
 
-
-
 	if (!m_muscle)
 	{
 
 		setPlugs(o_primGenNode, "segments", "20");
 		setPlugs(o_primGenNode, "profilePresets", "0");
-		setPlugs(o_primGenNode, "radius", MString() + d_curveLength * 0.02);
+		setPlugs(o_primGenNode, "radius", "1.0");
 		setPlugs(o_primGenNode, "sides", "20");
 		setPlugs(o_primGenNode, "jiggleEnabled", "false");
 
@@ -359,7 +357,7 @@ MStatus primitiveGeneratorCommand::createPrimGenFromLocators()
 		setPlugs(o_primGenNode, "jiggleEnabled", "true");
 		setPlugs(o_primGenNode, "segments", "20");
 		setPlugs(o_primGenNode, "profilePresets", "0");
-		setPlugs(o_primGenNode, "radius", "1.0");
+		setPlugs(o_primGenNode, "radius",  "1.0");
 		setPlugs(o_primGenNode, "sides", "10");
 
 		MIntArray m_curve_interps;

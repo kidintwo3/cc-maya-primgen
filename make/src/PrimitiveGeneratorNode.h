@@ -21,6 +21,7 @@
 #include <maya/MFnCompoundAttribute.h>
 #include <maya/MFnUnitAttribute.h>
 #include <maya/MRampAttribute.h>
+#include <maya/MFnNurbsCurveData.h>
 
 #include <maya/MFnNurbsCurve.h>
 
@@ -93,7 +94,10 @@ public:
 	static void			aboutToDeleteCB( MObject& node, MDGModifier& modifier, void* clientData );
 
 
+
 	static MTypeId      id;
+
+	
 
 	static MObject		aOutMesh;
 	static MObject      aInCurve;
