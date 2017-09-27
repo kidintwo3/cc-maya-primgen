@@ -65,7 +65,6 @@
 
 
 
-
 //#define M_PI = 3.14159265358979323846;
 
 class primitiveGenerator : public MPxNode
@@ -140,6 +139,7 @@ public:
 	static MObject      aStrandThinningRandomness;
 	static MObject      aStrandThinningSeed;
 	static MObject		aStrandCurl;
+	static MObject		aStrandCurlType;
 	static MObject		aStrandCurlWave;
 	
 
@@ -172,6 +172,7 @@ public:
 
 	// Overrides
 	static MObject		aDisableBaseMeshOverride;
+	static MObject		aInvertNormals;
 
 	// Jiggle
 
@@ -185,11 +186,17 @@ public:
 
 private:
 
+		
+	double				lerp(double parameter, double value1, double value2);
+	double				fade(double parameter);
+	double				grad(int hashId, double x, double y, double z);
+	double				improvedGradNoise(double vx, double vy, double vz);
+
 	double				m_r, m_width, m_height, m_strandWidth, m_strandHeight, m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_rotationRandom, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
 	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop, m_strandThinningSeed;
-	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V;
-	short				m_profilePreset, m_strandPreset;
+	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V, m_invertNormals;
+	short				m_profilePreset, m_strandPreset, m_strandCurlType;
 
 	MVector				m_firstUpVec;
 	MObject				m_o_curve;
@@ -232,6 +239,7 @@ private:
 
 	std::vector<MMatrixArray> trMatrixA_vec;
 
+	MIntArray			m_p;
 
 };
 
