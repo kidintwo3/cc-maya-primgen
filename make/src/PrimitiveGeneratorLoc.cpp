@@ -147,10 +147,10 @@ MBoundingBox PrimitiveGeneratorLoc::boundingBox() const
 
 // VP 2.0 Override functions
 
-bool PrimitiveGeneratorLocOverride::excludedFromPostEffects() const
-{
-	return true;
-}
+//bool PrimitiveGeneratorLocOverride::excludedFromPostEffects() const
+//{
+//	return true;
+//}
 
 MHWRender::DrawAPI PrimitiveGeneratorLocOverride::supportedDrawAPIs() const
 {

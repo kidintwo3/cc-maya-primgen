@@ -138,7 +138,7 @@ public:
 	virtual MUserData* prepareForDraw( const MDagPath& objPath, const MDagPath& cameraPath, const MHWRender::MFrameContext& frameContext, MUserData* oldData);
 
 
-	bool excludedFromPostEffects() const override;
+	// bool excludedFromPostEffects() const override;
 
 	virtual bool hasUIDrawables() const { return true; }
 	virtual void addUIDrawables( const MDagPath& objPath, MHWRender::MUIDrawManager& drawManager, const MHWRender::MFrameContext& frameContext, const MUserData* data);
