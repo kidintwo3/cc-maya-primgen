@@ -483,21 +483,21 @@ MStatus primitiveGeneratorCommand::doIt(const MArgList& argList)
 
 	}
 
-	if (m_duplicate)
-	{
-		status = createPrimGenDuplicate(p_currSelTrA, p_currSelShapeA);
-		if (status == MStatus::kFailure)
-		{
-			MGlobal::displayWarning(MString() + "[PrimGen] Selection does not have a PrimGen attached");
-			return::MStatus::kFailure;
-		}
+	//if (m_duplicate)
+	//{
+	//	status = createPrimGenDuplicate(p_currSelTrA, p_currSelShapeA);
+	//	if (status == MStatus::kFailure)
+	//	{
+	//		MGlobal::displayWarning(MString() + "[PrimGen] Selection does not have a PrimGen attached");
+	//		return::MStatus::kFailure;
+	//	}
 
-		else
-		{
-			MGlobal::displayInfo(MString() + "[PrimGen] Duplicating PrimGen");
-		}
+	//	else
+	//	{
+	//		MGlobal::displayInfo(MString() + "[PrimGen] Duplicating PrimGen");
+	//	}
 
-	}
+	//}
 
 
 	return redoIt();

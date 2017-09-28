@@ -972,8 +972,9 @@ MObject primitiveGenerator::generateStrips() {
 		if (m_type == 0)
 		{
 			MFnNurbsCurve curveFn(m_o_curve);
-			uv_width = (curveFn.length()*(1.0 - m_strandThinning));
-			uv_width *= m_autoUV_V_mult;
+			uv_height = (curveFn.length()*(1.0 - m_strandThinning));
+			uv_height *= m_autoUV_V_mult;
+			//uv_height *= 0.5;
 		}
 
 		// A-B
@@ -981,8 +982,9 @@ MObject primitiveGenerator::generateStrips() {
 		{
 
 			MVector ab = m_inLocB_pos - m_inLocA_pos;
-			uv_width = (ab.length()*(1.0 - m_strandThinning));
-			uv_width *= m_autoUV_V_mult;
+			uv_height = (ab.length()*(1.0 - m_strandThinning));
+			uv_height *= m_autoUV_V_mult;
+			//uv_height *= 0.5;
 		}
 	}
 
@@ -1280,7 +1282,7 @@ MObject primitiveGenerator::generateTubes()
 					if (m_strandCurlType == 1)
 					{
 						double inputValue = angle_extra;
-						double amplitudeValueX = m_strandCurl;
+						double amplitudeValueX = m_strandCurl*2;
 						double frequencyValueX = m_strandCurlWave*0.1;
 						double result_Custom_X = (improvedGradNoise(inputValue*(frequencyValueX), inputValue*(frequencyValueX), inputValue*(frequencyValueX)) * amplitudeValueX);
 
