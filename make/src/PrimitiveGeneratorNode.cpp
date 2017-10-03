@@ -766,7 +766,15 @@ MObject primitiveGenerator::generateStrips() {
 
 
 			double angle_extra = M_PI / 180 * i;
-			local_rot += (m_twistProfileA[i] * i / double(m_segments))*m_twist;
+
+
+
+			//local_rot += ((m_twistProfileA[i] / double(m_segments + 1))*m_twist) * 0.1;
+			//local_rot += ((m_twistProfileA[i] / double(m_segments - 1))*m_twist) * 10.0;
+
+			/*local_rot += (m_twist / 4.0) * m_twistProfileA[i];*/
+
+			local_rot += ((m_twist / (m_segments + 1)* 10.0) * m_twistProfileA[i]);
 
 			MTransformationMatrix trM(trMatrixA[s][i]);
 
@@ -1107,21 +1115,22 @@ MObject primitiveGenerator::generateTubes()
 		for (int i = 0; i < m_segments + 1; i++)
 		{
 
+
+
+
+			local_rot += ((m_twist / (m_segments+1)* 10.0) * m_twistProfileA[i]);
+
+
+
 			for (int j = 0; j < m_sides; j++)
 			{
 
 				double angle = deg * j / 180.0  * M_PI;
-				double angleRot = m_rotate / 180.0 * M_PI;
 
-				angleRot += (m_twistProfileA[i] * i / double(m_segments))*m_twist;
+
 
 				if (m_useProfile)
 				{
-					x = m_profilePointsA[j].x * m_r;
-					z = m_profilePointsA[j].z * m_r;
-
-
-
 
 
 					// Initial values
@@ -1144,7 +1153,7 @@ MObject primitiveGenerator::generateTubes()
 
 					MTransformationMatrix trM(trMatrixA[s][i]);
 
-					local_rot += (m_twistProfileA[i] * i / double(m_segments))*m_twist;
+
 
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0 - m_strandOffsetRandom);
@@ -1188,7 +1197,7 @@ MObject primitiveGenerator::generateTubes()
 						z += offset_extra;
 
 						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
-						trM.rotateBy(MEulerRotation(strand_rot + local_rot, 0.0, 0.0), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(local_rot + strand_rot, 0.0, 0.0), MSpace::kObject);
 					}
 
 
@@ -1264,7 +1273,6 @@ MObject primitiveGenerator::generateTubes()
 
 					MTransformationMatrix trM(trMatrixA[s][i]);
 
-					local_rot += (m_twistProfileA[i] * i / double(m_segments))*m_twist;
 
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0 - m_strandOffsetRandom);
@@ -1282,7 +1290,7 @@ MObject primitiveGenerator::generateTubes()
 					if (m_strandCurlType == 1)
 					{
 						double inputValue = angle_extra;
-						double amplitudeValueX = m_strandCurl*2;
+						double amplitudeValueX = m_strandCurl * 2;
 						double frequencyValueX = m_strandCurlWave*0.1;
 						double result_Custom_X = (improvedGradNoise(inputValue*(frequencyValueX), inputValue*(frequencyValueX), inputValue*(frequencyValueX)) * amplitudeValueX);
 
