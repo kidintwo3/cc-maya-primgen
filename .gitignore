@@ -104,3 +104,4 @@ $RECYCLE.BIN/
 *.user
 *.db
 *.opendb
+*.ipch

@@ -27,6 +27,7 @@ MObject		primitiveGenerator::aNumstrands;
 MObject     primitiveGenerator::aUseInputCurve;
 MObject     primitiveGenerator::aSmoothNormals;
 MObject     primitiveGenerator::aCapTop;
+MObject     primitiveGenerator::aDoNotConnect;
 MObject     primitiveGenerator::aAlingToUpVector;
 
 MObject     primitiveGenerator::aAutoSegments;
@@ -1103,6 +1104,8 @@ MObject primitiveGenerator::generateTubes()
 	double x, z;
 	double deg = 360.0 / double(m_sides);
 
+
+
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
@@ -1420,6 +1423,10 @@ MObject primitiveGenerator::generateTubes()
 
 	int connectA_count = 0;
 
+	// For do not connect
+	MIntArray tempFCA;
+	int tempcpunt = 0;
+
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
@@ -1431,6 +1438,8 @@ MObject primitiveGenerator::generateTubes()
 			{
 				faceConnects.append(i + connectA_count);
 			}
+
+			tempcpunt += 1;
 
 		}
 
@@ -1451,6 +1460,10 @@ MObject primitiveGenerator::generateTubes()
 				{
 					v2 = m_sides * j + (i + 1);
 					v3 = m_sides * j;
+
+
+					tempFCA.append(tempcpunt);
+
 				}
 
 				v0 += connectA_count;
@@ -1462,6 +1475,8 @@ MObject primitiveGenerator::generateTubes()
 				faceConnects.append(v3);
 				faceConnects.append(v2);
 				faceConnects.append(v1);
+
+				tempcpunt += 1;
 
 			}
 
@@ -1478,6 +1493,8 @@ MObject primitiveGenerator::generateTubes()
 
 				faceConnects.append(i + connectA_count + (m_sides * m_segments));
 			}
+
+			tempcpunt += 1;
 		}
 
 
@@ -1730,6 +1747,26 @@ MObject primitiveGenerator::generateTubes()
 	CHECK_MSTATUS(status);
 
 
+	
+
+
+	if (m_donot_connect)
+	{
+		MFnMesh probaFn(newMeshData);
+		MFloatVector zeroV;
+
+		status = probaFn.extractFaces(tempFCA, &zeroV);
+		CHECK_MSTATUS(status);
+
+		status = probaFn.collapseFaces(tempFCA);
+		CHECK_MSTATUS(status);
+
+		probaFn.updateSurface();
+	}
+
+
+
+
 	//MGlobal::displayInfo(MString() + "----");
 
 	for (int i = 0; i < meshFn.numEdges(); i++)
@@ -1898,6 +1935,8 @@ MStatus primitiveGenerator::compute(const MPlug& plug, MDataBlock& data)
 	m_smoothNorm = data.inputValue(aSmoothNormals, &status).asBool();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_capTop = data.inputValue(aCapTop, &status).asBool();
+	CHECK_MSTATUS_AND_RETURN_IT(status);
+	m_donot_connect = data.inputValue(aDoNotConnect, &status).asBool();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_alingToUpVector = data.inputValue(aAlingToUpVector, &status).asBool();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -2331,6 +2370,13 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute(primitiveGenerator::aSmoothNormals);
 
+	primitiveGenerator::aDoNotConnect = nAttr.create("doNotConnect", "doNotConnect", MFnNumericData::kBoolean);
+	nAttr.setDefault(false);
+	nAttr.setKeyable(true);
+	nAttr.setChannelBox(true);
+	nAttr.setHidden(false);
+	addAttribute(primitiveGenerator::aDoNotConnect);
+
 	primitiveGenerator::aCapTop = nAttr.create("capTop", "capTop", MFnNumericData::kBoolean);
 	nAttr.setDefault(true);
 	nAttr.setKeyable(true);
@@ -2666,6 +2712,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aUseInputCurve, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aSmoothNormals, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aCapTop, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aDoNotConnect, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aAlingToUpVector, primitiveGenerator::aOutMesh);
 
 	attributeAffects(primitiveGenerator::aOnlyKnotSegmentsRes, primitiveGenerator::aOutMesh);

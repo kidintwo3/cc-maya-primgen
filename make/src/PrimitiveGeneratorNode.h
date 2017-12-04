@@ -53,6 +53,8 @@
 #include <maya/MNodeMessage.h>
 #include <maya/MCallbackIdArray.h>
 
+#include <maya/MFloatVector.h>
+
 #include <maya/MTime.h>
 
 #include <stdio.h>
@@ -120,6 +122,7 @@ public:
 	static MObject      aUseInputCurve;
 	static MObject      aSmoothNormals;
 	static MObject      aCapTop;
+	static MObject      aDoNotConnect;
 	static MObject		aAlingToUpVector;
 
 
@@ -195,7 +198,7 @@ private:
 	double				m_r, m_width, m_height, m_strandWidth, m_strandHeight, m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_rotationRandom, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
 	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop, m_strandThinningSeed;
-	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V, m_invertNormals;
+	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V, m_invertNormals, m_donot_connect;
 	short				m_profilePreset, m_strandPreset, m_strandCurlType;
 
 	MVector				m_firstUpVec;
