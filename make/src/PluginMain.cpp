@@ -21,7 +21,7 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "2.02", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "2.03", "Any");
 
 
 	//bool check_lic = false;
