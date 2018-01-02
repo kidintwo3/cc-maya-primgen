@@ -1385,30 +1385,30 @@ MObject primitiveGenerator::generateTubes()
 		}
 
 
-		if (m_capPoles)
-		{
+		//if (m_capPoles)
+		//{
 
 
 
-			//for (int j = 0; j < m_sides; j++)
-			//{
+		//	//for (int j = 0; j < m_sides; j++)
+		//	//{
 
 
-			//	MFloatPoint outP;
+		//	//	MFloatPoint outP;
 
 
-			//	pA.append(outP);
+		//	//	pA.append(outP);
 
-			//	num_verts += 1;
+		//	//	num_verts += 1;
 
-			//}
+		//	//}
 
 
-			pA.append(MPoint(0.0, 0.0, 0.0));
-			pA.append(MPoint(0.0, 0.0, 1.0));
-			num_verts += 2;
+		//	pA.append(MPoint(0.0, 0.0, 0.0));
+		//	pA.append(MPoint(0.0, 0.0, 1.0));
+		//	num_verts += 2;
 
-		}
+		//}
 
 
 	}
@@ -1470,21 +1470,21 @@ MObject primitiveGenerator::generateTubes()
 
 	int num_faces = m_sides * (m_segments);
 
-	//if (m_capTop)
-	//{
-	//	num_faces = m_sides * (m_segments)+2;
-	//}
-
-
-
-	if (m_capPoles)
+	if (m_capTop)
 	{
-
-		//num_faces += m_sides * m_numstrands;
-
-		num_faces += 1;
-
+		num_faces = m_sides * (m_segments)+2;
 	}
+
+
+
+	//if (m_capPoles)
+	//{
+
+	//	//num_faces += m_sides * m_numstrands;
+
+	//	num_faces += 1;
+
+	//}
 
 	num_faces *= m_numstrands;
 
@@ -1495,10 +1495,10 @@ MObject primitiveGenerator::generateTubes()
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
-		//if (m_capTop)
-		//{
-		//	faceCounts.append(m_sides);
-		//}
+		if (m_capTop)
+		{
+			faceCounts.append(m_sides);
+		}
 
 		for (int i = 0; i < m_segments; i++)
 		{
@@ -1511,24 +1511,24 @@ MObject primitiveGenerator::generateTubes()
 		}
 
 
-		//if (m_capTop)
-		//{
-		//	faceCounts.append(m_sides);
-		//}
-
-
-
-		if (m_capPoles)
+		if (m_capTop)
 		{
-			//for (int j = 0; j < m_sides; j++)
-			//{
-			//	faceCounts.append(4);
-			//}
-
-
-			faceCounts.append(4);
-
+			faceCounts.append(m_sides);
 		}
+
+
+
+		//if (m_capPoles)
+		//{
+		//	//for (int j = 0; j < m_sides; j++)
+		//	//{
+		//	//	faceCounts.append(4);
+		//	//}
+
+
+		//	faceCounts.append(4);
+
+		//}
 
 
 	}
@@ -1548,18 +1548,18 @@ MObject primitiveGenerator::generateTubes()
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
-		//// Cap front
-		//if (m_capTop)
-		//{
+		// Cap front
+		if (m_capTop)
+		{
 
-		//	for (int i = m_sides; i-- > 0; )
-		//	{
-		//		faceConnects.append(i + connectA_count);
-		//	}
+			for (int i = m_sides; i-- > 0; )
+			{
+				faceConnects.append(i + connectA_count);
+			}
 
-		//	tempcpunt += 1;
+			tempcpunt += 1;
 
-		//}
+		}
 
 		for (int j = 0; j < m_segments; j++)
 		{
@@ -1603,28 +1603,28 @@ MObject primitiveGenerator::generateTubes()
 
 
 
-		//// Cap back
-		//if (m_capTop)
-		//{
-		//	for (int i = 0; i < m_sides; i++)
-		//	{
-
-		//		faceConnects.append(i + connectA_count + (m_sides * m_segments));
-		//	}
-
-		//	tempcpunt += 1;
-		//}
-
-		if (m_capPoles)
+		// Cap back
+		if (m_capTop)
 		{
+			for (int i = 0; i < m_sides; i++)
+			{
 
-			faceConnects.append((m_segments*m_sides) + 1);
-			faceConnects.append((m_segments*m_sides) + 2);
+				faceConnects.append(i + connectA_count + (m_sides * m_segments));
+			}
 
-			faceConnects.append((m_segments*m_sides) + 3);
-			faceConnects.append((m_segments*m_sides) + 4);
-
+			tempcpunt += 1;
 		}
+
+		//if (m_capPoles)
+		//{
+
+		//	faceConnects.append((m_segments*m_sides) + 1);
+		//	faceConnects.append((m_segments*m_sides) + 2);
+
+		//	faceConnects.append((m_segments*m_sides) + 3);
+		//	faceConnects.append((m_segments*m_sides) + 4);
+
+		//}
 
 
 
@@ -1653,17 +1653,17 @@ MObject primitiveGenerator::generateTubes()
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
-		//// Top cap
-		//if (m_capTop)
-		//{
+		// Top cap
+		if (m_capTop)
+		{
 
-		//	for (int i = 0; i < m_sides; i++)
-		//	{
-		//		uvIds.append(i + counter);
-		//	}
+			for (int i = 0; i < m_sides; i++)
+			{
+				uvIds.append(i + counter);
+			}
 
-		//	counter += m_sides;
-		//}
+			counter += m_sides;
+		}
 
 
 
@@ -1692,36 +1692,36 @@ MObject primitiveGenerator::generateTubes()
 
 
 
-		//// Top cap
-		//if (m_capTop)
-		//{
-
-		//	for (int i = 0; i < m_sides; i++)
-		//	{
-
-		//		uvIds.append(i + counter);
-		//	}
-
-		//	counter += m_sides;
-		//}
-
-		if (m_capPoles)
+		// Top cap
+		if (m_capTop)
 		{
-			for (int i = 0; i < m_sides; i++) {
 
-				v1 = i + 0 + counter;
-				v2 = i + 1 + counter;
-				v3 = i + 2 + m_sides + counter;
-				v4 = i + 1 + m_sides + counter;
+			for (int i = 0; i < m_sides; i++)
+			{
 
-
-				uvIds.append(v1);
-				uvIds.append(v2);
-				uvIds.append(v3);
-				uvIds.append(v4);
-
+				uvIds.append(i + counter);
 			}
+
+			counter += m_sides;
 		}
+
+		//if (m_capPoles)
+		//{
+		//	for (int i = 0; i < m_sides; i++) {
+
+		//		v1 = i + 0 + counter;
+		//		v2 = i + 1 + counter;
+		//		v3 = i + 2 + m_sides + counter;
+		//		v4 = i + 1 + m_sides + counter;
+
+
+		//		uvIds.append(v1);
+		//		uvIds.append(v2);
+		//		uvIds.append(v3);
+		//		uvIds.append(v4);
+
+		//	}
+		//}
 
 		counter += m_sides + 1;
 	}
@@ -1734,28 +1734,28 @@ MObject primitiveGenerator::generateTubes()
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
-		//if (m_capTop)
-		//{
-		//	uvCounts.append(m_sides);
-		//}
+		if (m_capTop)
+		{
+			uvCounts.append(m_sides);
+		}
 
 		for (int i = 0; i < m_sides * m_segments; i++) {
 
 			uvCounts.append(4);
 		}
 
-		//if (m_capTop)
-		//{
-		//	uvCounts.append(m_sides);
-		//}
-
-		if (m_capPoles)
+		if (m_capTop)
 		{
-			for (int i = 0; i < m_sides; i++) {
-
-				uvCounts.append(4);
-			}
+			uvCounts.append(m_sides);
 		}
+
+		//if (m_capPoles)
+		//{
+		//	for (int i = 0; i < m_sides; i++) {
+
+		//		uvCounts.append(4);
+		//	}
+		//}
 
 	}
 
@@ -1769,50 +1769,50 @@ MObject primitiveGenerator::generateTubes()
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
-		//if (m_capTop)
-		//{
+		if (m_capTop)
+		{
 
-		//	for (int i = 0; i < m_sides; i++)
-		//	{
+			for (int i = 0; i < m_sides; i++)
+			{
 
-		//		double deg = 360.0 / double(m_sides);
+				double deg = 360.0 / double(m_sides);
 
-		//		if (i != 0) {
-		//			angle = deg * double(i) / 180.0  * M_PI;
-		//		}
+				if (i != 0) {
+					angle = deg * double(i) / 180.0  * M_PI;
+				}
 
-		//		else {
-		//			angle = 0.0;
-		//		}
-		//		double angleRot = m_rotate / 180.0 * M_PI;
+				else {
+					angle = 0.0;
+				}
+				double angleRot = m_rotate / 180.0 * M_PI;
 
-		//		u = cos(angle) * m_capUVsize;
-		//		v = sin(angle) * m_capUVsize;
+				u = cos(angle) * m_capUVsize;
+				v = sin(angle) * m_capUVsize;
 
-		//		if (!m_useProfile)
-		//		{
+				if (!m_useProfile)
+				{
 
-		//			u = cos(angle + angleRot) * m_capUVsize;
-		//			v = sin(angle + angleRot) * m_capUVsize;
-		//		}
-
-
-		//		if (m_useProfile)
-		//		{
-
-		//			u = m_profilePointsA[i].x * m_capUVsize;
-		//			v = m_profilePointsA[i].z * m_capUVsize;
+					u = cos(angle + angleRot) * m_capUVsize;
+					v = sin(angle + angleRot) * m_capUVsize;
+				}
 
 
-		//		}
+				if (m_useProfile)
+				{
+
+					u = m_profilePointsA[i].x * m_capUVsize;
+					v = m_profilePointsA[i].z * m_capUVsize;
 
 
-		//		uArray.append(u + m_uOffsetCap);
-		//		vArray.append(v + m_vOffsetCap);
+				}
 
-		//	}
 
-		//}
+				uArray.append(u + m_uOffsetCap);
+				vArray.append(v + m_vOffsetCap);
+
+			}
+
+		}
 
 		// Auto UV - V scale : 
 		if (m_autoUV_V)
@@ -1856,38 +1856,38 @@ MObject primitiveGenerator::generateTubes()
 		}
 
 
-		//if (m_capTop)
-		//{
+		if (m_capTop)
+		{
 
-		//	for (int i = 0; i < m_sides; i++) {
+			for (int i = 0; i < m_sides; i++) {
 
-		//		double deg = 360.0 / double(m_sides);
+				double deg = 360.0 / double(m_sides);
 
-		//		double angle = deg * double(i) / 180.0  * M_PI;
-		//		double angleRot = m_rotate / 180.0 * M_PI;
+				double angle = deg * double(i) / 180.0  * M_PI;
+				double angleRot = m_rotate / 180.0 * M_PI;
 
-		//		if (!m_useProfile) {
+				if (!m_useProfile) {
 
-		//			u = cos(angle + angleRot) * m_capUVsize;
-		//			v = sin(angle + angleRot) * m_capUVsize;
+					u = cos(angle + angleRot) * m_capUVsize;
+					v = sin(angle + angleRot) * m_capUVsize;
 
-		//		}
+				}
 
 
-		//		if (m_useProfile)
-		//		{
+				if (m_useProfile)
+				{
 
-		//			u = m_profilePointsA[i].x * m_capUVsize;
-		//			v = m_profilePointsA[i].z * m_capUVsize;
-		//		}
+					u = m_profilePointsA[i].x * m_capUVsize;
+					v = m_profilePointsA[i].z * m_capUVsize;
+				}
 
-		//		u += m_capUVsize*2.0;
+				u += m_capUVsize*2.0;
 
-		//		uArray.append(u + m_uOffsetCap);
-		//		vArray.append(v + m_vOffsetCap);
-		//	}
+				uArray.append(u + m_uOffsetCap);
+				vArray.append(v + m_vOffsetCap);
+			}
 
-		//}
+		}
 
 	}
 
@@ -1905,22 +1905,22 @@ MObject primitiveGenerator::generateTubes()
 	MFnMeshData meshDataFn;
 	MObject newMeshData = meshDataFn.create();
 	MFnMesh meshFn;
-	//meshFn.create(num_verts, num_faces, pA, faceCounts, faceConnects, uArray, vArray, newMeshData, &status);
-	//CHECK_MSTATUS(status);
-	//status = meshFn.assignUVs(uvCounts, uvIds);
-	//CHECK_MSTATUS(status);
-
-
-	meshFn.create(num_verts, num_faces, pA, faceCounts, faceConnects, newMeshData, &status);
+	meshFn.create(num_verts, num_faces, pA, faceCounts, faceConnects, uArray, vArray, newMeshData, &status);
+	CHECK_MSTATUS(status);
+	status = meshFn.assignUVs(uvCounts, uvIds);
 	CHECK_MSTATUS(status);
 
 
-	MGlobal::displayInfo(MString() + num_verts);
-	MGlobal::displayInfo(MString() + num_faces);
-	MGlobal::displayInfo(MString() + pA.length());
-	MGlobal::displayInfo(MString() + faceCounts.length());
-	MGlobal::displayInfo(MString() + faceConnects.length());
-	MGlobal::displayInfo(MString() + "------------");
+	//meshFn.create(num_verts, num_faces, pA, faceCounts, faceConnects, newMeshData, &status);
+	//CHECK_MSTATUS(status);
+
+
+	//MGlobal::displayInfo(MString() + num_verts);
+	//MGlobal::displayInfo(MString() + num_faces);
+	//MGlobal::displayInfo(MString() + pA.length());
+	//MGlobal::displayInfo(MString() + faceCounts.length());
+	//MGlobal::displayInfo(MString() + faceConnects.length());
+	//MGlobal::displayInfo(MString() + "------------");
 
 
 	if (m_donot_connect)
@@ -1938,66 +1938,66 @@ MObject primitiveGenerator::generateTubes()
 	}
 
 
-	//if (m_capPoles)
-	//{
-	//	if (m_capTop)
-	//	{
-	//		if (!m_closedCircle)
-	//		{
+	if (m_capPoles)
+	{
+		if (m_capTop)
+		{
+			if (!m_closedCircle)
+			{
 
-	//			MFnMesh probaFn(newMeshData);
-
-
-	//			// cap end polygons
-
-	//			int lastPoly = probaFn.numPolygons() - 1;
-
-	//			MIntArray extr_tmpA(1, lastPoly);
-	//			MFloatVector oringinV;
-
-	//			//MFnNurbsCurve curveFn(m_o_curve);
-	//			//double extr_dist = (curveFn.length() / m_segments+1) * 0.1;
-
-	//			double m_capPoles_percentage = 0.25;
-
-	//			status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
-	//			CHECK_MSTATUS(status);
-	//			status = probaFn.updateSurface();
-	//			CHECK_MSTATUS(status);
-
-	//			status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
-	//			CHECK_MSTATUS(status);
-	//			status = probaFn.updateSurface();
-	//			CHECK_MSTATUS(status);
-
-	//			status = probaFn.collapseFaces(extr_tmpA);
-	//			CHECK_MSTATUS(status);
-	//			status = probaFn.updateSurface();
-	//			CHECK_MSTATUS(status);
+				MFnMesh probaFn(newMeshData);
 
 
-	//			// cap first polygon
+				// cap end polygons
 
-	//			MIntArray extr_first_tmpA(1, 0);
+				int lastPoly = probaFn.numPolygons() - 1;
 
-	//			status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
-	//			CHECK_MSTATUS(status);
-	//			status = probaFn.updateSurface();
-	//			CHECK_MSTATUS(status);
+				MIntArray extr_tmpA(1, lastPoly);
+				MFloatVector oringinV;
 
-	//			status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
-	//			CHECK_MSTATUS(status);
-	//			status = probaFn.updateSurface();
-	//			CHECK_MSTATUS(status);
+				//MFnNurbsCurve curveFn(m_o_curve);
+				//double extr_dist = (curveFn.length() / m_segments+1) * 0.1;
 
-	//			status = probaFn.collapseFaces(extr_first_tmpA);
-	//			CHECK_MSTATUS(status);
-	//			status = probaFn.updateSurface();
-	//			CHECK_MSTATUS(status);
+				double m_capPoles_percentage = 0.1;
 
-	//		}
-	//	}
-	//}
+				status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
+				CHECK_MSTATUS(status);
+				status = probaFn.updateSurface();
+				CHECK_MSTATUS(status);
+
+				status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
+				CHECK_MSTATUS(status);
+				status = probaFn.updateSurface();
+				CHECK_MSTATUS(status);
+
+				status = probaFn.collapseFaces(extr_tmpA);
+				CHECK_MSTATUS(status);
+				status = probaFn.updateSurface();
+				CHECK_MSTATUS(status);
+
+
+				// cap first polygon
+
+				MIntArray extr_first_tmpA(1, 0);
+
+				status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
+				CHECK_MSTATUS(status);
+				status = probaFn.updateSurface();
+				CHECK_MSTATUS(status);
+
+				status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
+				CHECK_MSTATUS(status);
+				status = probaFn.updateSurface();
+				CHECK_MSTATUS(status);
+
+				status = probaFn.collapseFaces(extr_first_tmpA);
+				CHECK_MSTATUS(status);
+				status = probaFn.updateSurface();
+				CHECK_MSTATUS(status);
+
+			}
+		}
+	}
 
 
 
