@@ -381,6 +381,7 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 {
 
 
+
 	MStatus status;
 	MMatrixArray trMatrixA;
 
@@ -391,7 +392,7 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 	srand(m_strandThinningSeed);
 
-	m_lengthAr.clear();
+	//m_lengthAr.clear();
 
 	// random array
 
@@ -448,16 +449,23 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 				mult = 1.0;
 			}
 
-			double length = (curveFn.length() / double(m_segments));
+			double length = (curveFn.length() / double(m_segments -1  )  );
 			length *= 1.0 - (m_strandThinning * mult);
 
-			m_lengthAr.append(length);
+			//m_lengthAr.append(length);
 
 
 			// length *= 1.0 - m_strandThinning;
 
+
+			
+			MGlobal::displayInfo(MString() + "-----");
+
+
 			for (int i = 0; i < m_segments + 1; i++)
 			{
+
+				MGlobal::displayInfo(MString() + i);
 
 				MPoint p;
 
@@ -477,18 +485,52 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 				}
 
 
-
 				MVector tan = curveFn.tangent(param, MSpace::kObject, &status);
+
 
 				if (i == 0)
 				{
 					currentNormal = -curveFn.normal(param, MSpace::kObject, &status);
-
 					currentNormal += m_firstUpVec;
 
 				}
 
 
+
+
+				// Override param for cap segments
+
+				if (m_cap_segments > 0)
+				{
+					if ( i == m_segments -1)
+					{
+
+						MGlobal::displayInfo(MString() + i + " -> last");
+
+						param = curveFn.findParamFromLength((m_segments-1) * length, &status);
+						CHECK_MSTATUS(status);
+						status = curveFn.getPointAtParam(param, p, MSpace::kObject);
+						CHECK_MSTATUS(status);
+
+					}
+
+					if (i ==1)
+					{
+
+
+						MGlobal::displayInfo(MString() + i + " -> first");
+
+						param = curveFn.findParamFromLength((1)* length, &status);
+						CHECK_MSTATUS(status);
+
+						status = curveFn.getPointAtParam(param, p, MSpace::kObject);
+						CHECK_MSTATUS(status);
+
+						tan = curveFn.tangent(param, MSpace::kObject, &status);
+
+					}
+
+				}
 
 				// CHECK_MSTATUS(status);
 				tan.normalize();
@@ -860,16 +902,18 @@ MObject primitiveGenerator::generateStrips() {
 
 				trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
 				trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult, 0.0, 0.0), MSpace::kObject);
+
+
 			}
 
 
 			//
 
 
+
+
+
 			double rad = m_r;
-
-
-
 
 			rad *= m_segmentsProfileA[i];
 
@@ -1107,7 +1151,6 @@ MObject primitiveGenerator::generateTubes()
 	double deg = 360.0 / double(m_sides);
 
 
-
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
@@ -1119,6 +1162,11 @@ MObject primitiveGenerator::generateTubes()
 
 		for (int i = 0; i < m_segments + 1; i++)
 		{
+
+
+			//if (i < m_segments + 1)
+			//{
+
 
 
 
@@ -1279,6 +1327,21 @@ MObject primitiveGenerator::generateTubes()
 					MTransformationMatrix trM(trMatrixA[s][i]);
 
 
+					// Override param for cap segments
+					if (i == m_segments || i == 0)
+					{
+						double curr_scale[3];
+
+						trM.getScale(curr_scale, MSpace::kObject);
+
+						curr_scale[0] *= m_rotationRandom;
+						curr_scale[1] *= m_rotationRandom;
+						curr_scale[2] *= m_rotationRandom;
+
+						trM.addScale(curr_scale, MSpace::kObject);
+					}
+
+
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0 - m_strandOffsetRandom);
 
@@ -1359,7 +1422,6 @@ MObject primitiveGenerator::generateTubes()
 
 
 
-
 					// Pipe back point array
 
 					MFloatPoint outP = MFloatPoint((pnt * trM.asMatrix()));
@@ -1381,6 +1443,9 @@ MObject primitiveGenerator::generateTubes()
 
 				num_verts += 1;
 			}
+
+
+
 
 		}
 
@@ -1938,66 +2003,66 @@ MObject primitiveGenerator::generateTubes()
 	}
 
 
-	if (m_capPoles)
-	{
-		if (m_capTop)
-		{
-			if (!m_closedCircle)
-			{
+	//if (m_capPoles)
+	//{
+	//	if (m_capTop)
+	//	{
+	//		if (!m_closedCircle)
+	//		{
 
-				MFnMesh probaFn(newMeshData);
-
-
-				// cap end polygons
-
-				int lastPoly = probaFn.numPolygons() - 1;
-
-				MIntArray extr_tmpA(1, lastPoly);
-				MFloatVector oringinV;
-
-				//MFnNurbsCurve curveFn(m_o_curve);
-				//double extr_dist = (curveFn.length() / m_segments+1) * 0.1;
-
-				double m_capPoles_percentage = 0.1;
-
-				status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
-				CHECK_MSTATUS(status);
-				status = probaFn.updateSurface();
-				CHECK_MSTATUS(status);
-
-				status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
-				CHECK_MSTATUS(status);
-				status = probaFn.updateSurface();
-				CHECK_MSTATUS(status);
-
-				status = probaFn.collapseFaces(extr_tmpA);
-				CHECK_MSTATUS(status);
-				status = probaFn.updateSurface();
-				CHECK_MSTATUS(status);
+	//			MFnMesh probaFn(newMeshData);
 
 
-				// cap first polygon
+	//			// cap end polygons
 
-				MIntArray extr_first_tmpA(1, 0);
+	//			int lastPoly = probaFn.numPolygons() - 1;
 
-				status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
-				CHECK_MSTATUS(status);
-				status = probaFn.updateSurface();
-				CHECK_MSTATUS(status);
+	//			MIntArray extr_tmpA(1, lastPoly);
+	//			MFloatVector oringinV;
 
-				status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
-				CHECK_MSTATUS(status);
-				status = probaFn.updateSurface();
-				CHECK_MSTATUS(status);
+	//			//MFnNurbsCurve curveFn(m_o_curve);
+	//			//double extr_dist = (curveFn.length() / m_segments+1) * 0.1;
 
-				status = probaFn.collapseFaces(extr_first_tmpA);
-				CHECK_MSTATUS(status);
-				status = probaFn.updateSurface();
-				CHECK_MSTATUS(status);
+	//			double m_capPoles_percentage = 0.1;
 
-			}
-		}
-	}
+	//			status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
+	//			CHECK_MSTATUS(status);
+	//			status = probaFn.updateSurface();
+	//			CHECK_MSTATUS(status);
+
+	//			status = probaFn.extrudeFaces(extr_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
+	//			CHECK_MSTATUS(status);
+	//			status = probaFn.updateSurface();
+	//			CHECK_MSTATUS(status);
+
+	//			status = probaFn.collapseFaces(extr_tmpA);
+	//			CHECK_MSTATUS(status);
+	//			status = probaFn.updateSurface();
+	//			CHECK_MSTATUS(status);
+
+
+	//			// cap first polygon
+
+	//			MIntArray extr_first_tmpA(1, 0);
+
+	//			status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*m_capPoles_percentage);
+	//			CHECK_MSTATUS(status);
+	//			status = probaFn.updateSurface();
+	//			CHECK_MSTATUS(status);
+
+	//			status = probaFn.extrudeFaces(extr_first_tmpA, 1, &oringinV, true, 0.0, m_r*(1.0 - m_capPoles_percentage));
+	//			CHECK_MSTATUS(status);
+	//			status = probaFn.updateSurface();
+	//			CHECK_MSTATUS(status);
+
+	//			status = probaFn.collapseFaces(extr_first_tmpA);
+	//			CHECK_MSTATUS(status);
+	//			status = probaFn.updateSurface();
+	//			CHECK_MSTATUS(status);
+
+	//		}
+	//	}
+	//}
 
 
 
@@ -2287,6 +2352,12 @@ MStatus primitiveGenerator::compute(const MPlug& plug, MDataBlock& data)
 		MFnNurbsCurve mfC(m_o_curve);
 		m_segments = mfC.numCVs() - 1;
 	}
+
+
+	// Add cap segments
+
+	m_cap_segments = 2;
+	m_segments += m_cap_segments;
 
 
 	//MObject m_inCurve = data.inputValue(aInCurve, &status).asNurbsCurve();
