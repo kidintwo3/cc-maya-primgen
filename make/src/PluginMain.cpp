@@ -92,19 +92,19 @@ MStatus initializePlugin( MObject obj )
 
 	// Manipulator
 
-	status = fnPlugin.registerContextCommand("rotateContext",&rotateContext::creator);
-	if (!status) {
-		MGlobal::displayError("Error registering rotateContext command");
-		return status;
-	}
+	//status = fnPlugin.registerContextCommand("rotateContext",&rotateContext::creator);
+	//if (!status) {
+	//	MGlobal::displayError("Error registering rotateContext command");
+	//	return status;
+	//}
 
-	status = fnPlugin.registerNode("exampleRotateManip", exampleRotateManip::id,
-		&exampleRotateManip::creator, &exampleRotateManip::initialize,
-		MPxNode::kManipContainer);
-	if (!status) {
-		MGlobal::displayError("Error registering rotateManip node");
-		return status;
-	}
+	//status = fnPlugin.registerNode("exampleRotateManip", exampleRotateManip::id,
+	//	&exampleRotateManip::creator, &exampleRotateManip::initialize,
+	//	MPxNode::kManipContainer);
+	//if (!status) {
+	//	MGlobal::displayError("Error registering rotateManip node");
+	//	return status;
+	//}
 
 	return status;
 }
@@ -113,7 +113,7 @@ MStatus uninitializePlugin( MObject obj )
 {
 	MStatus		status;
 	MFnPlugin	fnPlugin( obj );
-
+	 
 	status = fnPlugin.deregisterCommand( "primitiveGeneratorCommand" );
 	CHECK_MSTATUS_AND_RETURN_IT( status );
 
@@ -128,17 +128,17 @@ MStatus uninitializePlugin( MObject obj )
 
 	// Manipulator
 
-	status = fnPlugin.deregisterContextCommand("rotateContext");
-	if (!status) {
-		MGlobal::displayError("Error deregistering rotateContext command");
-		return status;
-	}
+	//status = fnPlugin.deregisterContextCommand("rotateContext");
+	//if (!status) {
+	//	MGlobal::displayError("Error deregistering rotateContext command");
+	//	return status;
+	//}
 
-	status = fnPlugin.deregisterNode(exampleRotateManip::id);
-	if (!status) {
-		MGlobal::displayError("Error deregistering RotateManip node");
-		return status;
-	}
+	//status = fnPlugin.deregisterNode(exampleRotateManip::id);
+	//if (!status) {
+	//	MGlobal::displayError("Error deregistering RotateManip node");
+	//	return status;
+	//}
 
 	return status;
 }
