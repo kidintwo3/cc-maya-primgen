@@ -64,8 +64,7 @@
 #include <ctime>
 #include <cstdlib>
 #include <vector>
-
-
+#include <fstream>
 
 //#define M_PI = 3.14159265358979323846;
 
@@ -139,7 +138,7 @@ public:
 
 	static MObject      aStrandOffset;
 	static MObject      aStrandOffsetRandom;
-	static MObject		aRotationRandom;
+	static MObject		aCapChamfer;
 	static MObject      aStrandThinning;
 	static MObject      aStrandThinningRandomness;
 	static MObject      aStrandThinningSeed;
@@ -197,7 +196,7 @@ private:
 	double				grad(int hashId, double x, double y, double z);
 	double				improvedGradNoise(double vx, double vy, double vz);
 
-	double				m_r, m_width, m_height, m_strandWidth, m_strandHeight, m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_rotationRandom, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
+	double				m_r, m_width, m_height, m_strandWidth, m_strandHeight, m_rotate, m_twist, m_zOffset, m_strandOffset, m_strandOffsetRandom, m_capChamfer, m_strandThinning, m_strandCurl, m_strandCurlWave, m_autoUV_V_mult, m_trandThinningRandomness;
 	double				m_capUVsize, m_uWidth, m_vWidth, m_uOffset, m_vOffset, m_uOffsetCap, m_vOffsetCap, m_uvRotate;
 	int					m_sides, m_segmentsLoop, m_segments, m_autoSegRes, m_type, m_numstrands, m_strandsLoop, m_strandThinningSeed, m_cap_segments;
 	bool				m_autoSeg, m_smoothNorm, m_capTop, m_useProfile, m_segOnlyKnots, m_alingToUpVector, m_autoUV_V, m_invertNormals, m_donot_connect, m_closedCircle, m_capPoles;

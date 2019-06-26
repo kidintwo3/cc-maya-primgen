@@ -50,7 +50,7 @@ MObject     primitiveGenerator::aFirstUpVecZ;
 MObject		primitiveGenerator::aCurveZOffset;
 MObject		primitiveGenerator::aStrandOffset;
 MObject		primitiveGenerator::aStrandOffsetRandom;
-MObject		primitiveGenerator::aRotationRandom;
+MObject		primitiveGenerator::aCapChamfer;
 MObject		primitiveGenerator::aStrandThinning;
 MObject		primitiveGenerator::aStrandThinningRandomness;
 MObject		primitiveGenerator::aStrandThinningSeed;
@@ -290,7 +290,7 @@ double primitiveGenerator::lerp(double parameter, double value1, double value2)
 
 double primitiveGenerator::fade(double parameter)
 {
-	return parameter*parameter*parameter*(parameter*(parameter*6.0 - 15.0) + 10.0);
+	return parameter * parameter * parameter * (parameter * (parameter * 6.0 - 15.0) + 10.0);
 }
 
 double primitiveGenerator::grad(int hashId, double x, double y, double z)
@@ -449,28 +449,39 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 				mult = 1.0;
 			}
 
-			double length = (curveFn.length() / double(m_segments -1  )  );
+
+			double length = (curveFn.length() / double(m_segments - 1));
 			length *= 1.0 - (m_strandThinning * mult);
 
-			//m_lengthAr.append(length);
+
+			double seg_div = double(m_segments - 1);
+			if (seg_div <= 0) {
+				seg_div = 1;
+			}
+
+			length += length / seg_div ;
 
 
-			// length *= 1.0 - m_strandThinning;
 
-
-			
-			MGlobal::displayInfo(MString() + "-----");
+			//MGlobal::displayInfo(MString() + "-----");
 
 
 			for (int i = 0; i < m_segments + 1; i++)
 			{
 
-				MGlobal::displayInfo(MString() + i);
-
 				MPoint p;
 
-				double param = curveFn.findParamFromLength(double(i) * length, &status);
-				// CHECK_MSTATUS(status);
+				double param = curveFn.findParamFromLength((double(i) * length) - length , &status);
+				CHECK_MSTATUS(status);
+
+				if (i == 1) {
+					param = curveFn.findParamFromLength(0, &status);
+					CHECK_MSTATUS(status);
+				}
+				if (i == m_segments - 1) {
+					param = curveFn.findParamFromLength(length * m_segments, &status);
+					CHECK_MSTATUS(status);
+				}
 
 
 
@@ -480,8 +491,9 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 				if (m_segOnlyKnots)
 				{
 					status = curveFn.getParamAtPoint(cvA[i], param, 1.0, MSpace::kObject);
-					// CHECK_MSTATUS(status);
+					CHECK_MSTATUS(status);
 					p = cvA[i];
+
 				}
 
 
@@ -498,50 +510,50 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 
 
-				// Override param for cap segments
+				//// Override param for cap segments
 
-				if (m_cap_segments > 0)
-				{
-					if ( i == m_segments -1)
-					{
+				//if (m_cap_segments > 0)
+				//{
+				//	if ( i == m_segments -1)
+				//	{
 
-						MGlobal::displayInfo(MString() + i + " -> last");
+				//		MGlobal::displayInfo(MString() + i + " -> last");
 
-						param = curveFn.findParamFromLength((m_segments-1) * length, &status);
-						CHECK_MSTATUS(status);
-						status = curveFn.getPointAtParam(param, p, MSpace::kObject);
-						CHECK_MSTATUS(status);
+				//		param = curveFn.findParamFromLength((m_segments-1) * length, &status);
+				//		CHECK_MSTATUS(status);
+				//		status = curveFn.getPointAtParam(param, p, MSpace::kObject);
+				//		CHECK_MSTATUS(status);
 
-					}
+				//	}
 
-					if (i ==1)
-					{
+				//	if (i ==1)
+				//	{
 
 
-						MGlobal::displayInfo(MString() + i + " -> first");
+				//		MGlobal::displayInfo(MString() + i + " -> first");
 
-						param = curveFn.findParamFromLength((1)* length, &status);
-						CHECK_MSTATUS(status);
+				//		param = curveFn.findParamFromLength((1)* length, &status);
+				//		CHECK_MSTATUS(status);
 
-						status = curveFn.getPointAtParam(param, p, MSpace::kObject);
-						CHECK_MSTATUS(status);
+				//		status = curveFn.getPointAtParam(param, p, MSpace::kObject);
+				//		CHECK_MSTATUS(status);
 
-						tan = curveFn.tangent(param, MSpace::kObject, &status);
+				//		tan = curveFn.tangent(param, MSpace::kObject, &status);
 
-					}
+				//	}
 
-				}
+				//}
 
 				// CHECK_MSTATUS(status);
 				tan.normalize();
 
-				MVector cross1 = currentNormal^tan;
+				MVector cross1 = currentNormal ^ tan;
 				cross1.normalize();
 
 
 
 
-				MVector cross2 = tan^cross1;
+				MVector cross2 = tan ^ cross1;
 
 				if (m_alingToUpVector)
 				{
@@ -602,10 +614,15 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 		MVector ab = m_inLocB_pos - m_inLocA_pos;
 
 		double abLength = ab.length();
-
 		abLength *= 1.0 - m_strandThinning;
 
-		double step = abLength / double(m_segments);
+		double step = abLength / double(m_segments-2);
+
+
+
+		//double extended_lenght = abLength + step_temp * 2.0;
+		//double step = extended_lenght / double(m_segments + 2);
+
 
 		MVector ab_dir = ab;
 		ab_dir.normalize();
@@ -628,11 +645,24 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 			jiggle_calculate(cv);
 
-
+			double active_step = -step;
 
 			for (int i = 0; i <= m_segments; i++)
 			{
-				MPoint p(m_inLocA_pos + xDir * step * double(i));
+				MPoint p(m_inLocA_pos + xDir * active_step);
+
+				if (i == 0) {
+					p = m_inLocA_pos;
+				}
+
+				if (i == m_segments - 1) {
+					p = m_inLocA_pos + xDir * step * double(m_segments - 2);
+				}
+
+				if (i == m_segments) {
+					p = m_inLocA_pos + xDir * step * double(m_segments - 2);
+				}
+
 
 				MPoint p_jiggle(m_jiggleVector + xDir * step * double(i));
 				MVector pOff = p_jiggle - p;
@@ -660,6 +690,10 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 
 				trMatrixA.append(rotMatrix);
 
+				if (i > 1 || i < m_segments - 1) {
+					active_step += step;
+				}
+
 			}
 
 			for (int s = 0; s < m_numstrands; s++)
@@ -674,12 +708,27 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 		//
 		if (!m_jiggleEnabled)
 		{
-
+			double active_step = -step;
 
 			for (int i = 0; i <= m_segments; i++)
 			{
 
-				MPoint p(m_inLocA_pos + xDir * step * double(i));
+				MPoint p(m_inLocA_pos + xDir * active_step);
+
+
+
+				if (i == 0) {
+					p = m_inLocA_pos ;
+				}
+
+				if (i == m_segments - 1) {
+					p = m_inLocA_pos + xDir * step * double(m_segments-2);
+				}
+
+				if (i == m_segments ) {
+					p = m_inLocA_pos + xDir * step * double(m_segments - 2);
+				}
+
 
 				double m[4][4] = { {xDir.x, xDir.y, xDir.z, 0.0}, {yDir.x, yDir.y, yDir.z, 0.0}, {zDir.x, zDir.y, zDir.z, 0.0}, {p.x, p.y, p.z, 1.0} };
 
@@ -688,6 +737,11 @@ std::vector<MMatrixArray> primitiveGenerator::calculateMatrix()
 				// put everything back
 
 				trMatrixA.append(rotMatrix);
+
+
+				if (i > 1 || i < m_segments - 1) {
+					active_step += step;
+				}
 
 			}
 
@@ -801,7 +855,7 @@ MObject primitiveGenerator::generateStrips() {
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
-		double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+		double dag = ((M_PI * 2.0) / double(m_numstrands)) * double(s);
 		double strand_rot = ((360.0 / m_numstrands) * double(s)) / 180.0 * M_PI;
 		double local_rot = m_rotate / 180.0 * M_PI;
 
@@ -819,7 +873,7 @@ MObject primitiveGenerator::generateStrips() {
 
 			/*local_rot += (m_twist / 4.0) * m_twistProfileA[i];*/
 
-			local_rot += ((m_twist / (m_segments + 1)* 10.0) * m_twistProfileA[i]);
+			local_rot += ((m_twist / (m_segments + 1) * 10.0) * m_twistProfileA[i]);
 
 			MTransformationMatrix trM(trMatrixA[s][i]);
 
@@ -835,7 +889,7 @@ MObject primitiveGenerator::generateStrips() {
 			double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
 
 
-			double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+			double offset_extra = (m_strandCurl * m_stranCurlProfileA[i]) * sin(angle_extra * m_strandCurlWave);
 
 
 
@@ -844,10 +898,10 @@ MObject primitiveGenerator::generateStrips() {
 			{
 				double inputValue = angle_extra;
 				double amplitudeValueX = m_strandCurl;
-				double frequencyValueX = m_strandCurlWave*0.1;
-				double result_Custom_X = (improvedGradNoise(inputValue*(frequencyValueX), inputValue*(frequencyValueX), inputValue*(frequencyValueX)) * amplitudeValueX);
+				double frequencyValueX = m_strandCurlWave * 0.1;
+				double result_Custom_X = (improvedGradNoise(inputValue * (frequencyValueX), inputValue * (frequencyValueX), inputValue * (frequencyValueX)) * amplitudeValueX);
 
-				offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+				offset_extra = (m_strandCurl * m_stranCurlProfileA[i]) * sin(angle_extra * m_strandCurlWave);
 				offset_extra *= result_Custom_X;
 			}
 
@@ -894,15 +948,13 @@ MObject primitiveGenerator::generateStrips() {
 				z *= m_strandHeight;
 				z += offset_extra;
 
-				// Add back
-
-				double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
-				rnd_rot_mult *= M_PI / 180;
+				//// Add back
+				//double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
+				//rnd_rot_mult *= M_PI / 180;
 
 
 				trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
-				trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult, 0.0, 0.0), MSpace::kObject);
-
+				trM.rotateBy(MEulerRotation(local_rot, 0.0, 0.0), MSpace::kObject);
 
 			}
 
@@ -935,7 +987,101 @@ MObject primitiveGenerator::generateStrips() {
 
 		}
 	}
-	//	int len = pA.length();
+
+
+
+
+	//// Closed Curves - Super inneficent
+	//if (m_closedCircle)
+	//{
+
+
+
+	//	MPoint pA1 = pA[0];
+	//	MPoint pA2 = pA[1];
+
+
+	//	MPoint pB1 = pA[pA.length() - 1];
+	//	MPoint pB2 = pA[pA.length() - 2];
+
+
+
+	//	MPoint mid_pA1 = MPoint((pA1.x + pB2.x) * 0.5,
+	//		(pA1.y + pB2.y) * 0.5,
+	//		(pA1.z + pB2.z) * 0.5);
+
+	//	MPoint mid_pB1 = MPoint((pA2.x + pB1.x) * 0.5,
+	//		(pA2.y + pB1.y) * 0.5,
+	//		(pA2.z + pB1.z) * 0.5);
+
+	//	pA[0] = mid_pA1;
+	//	pA[pA.length() - 2] = mid_pA1;
+
+	//	pA[1] = mid_pB1;
+	//	pA[pA.length() - 1] = mid_pB1;
+
+
+	//}
+
+
+
+
+
+	// Closed Curves - Super inneficent
+	if (m_closedCircle)
+	{
+
+		int vert_id = 0;
+		//int vert_id_first = 0;
+
+		for (int s = 0; s < m_numstrands; s++)
+		{
+
+			for (int i = 0; i < m_segments + 1; i++)
+			{
+			
+
+					if (i == m_segments)
+					{
+
+
+						MPoint current_p = pA[vert_id];
+						MPoint first_p = pA[vert_id - (m_segments )];
+
+						MPoint mid_p = MPoint((current_p.x + first_p.x) * 0.5,
+							(current_p.y + first_p.y) * 0.5,
+							(current_p.z + first_p.z) * 0.5);
+
+						pA[vert_id] = mid_p;
+						pA[vert_id - m_segments] = mid_p;
+					}
+
+
+					vert_id += 1;
+
+
+				
+
+
+			}
+		}
+
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	// Facecounts CAPS
 	MIntArray faceCounts;
@@ -993,6 +1139,7 @@ MObject primitiveGenerator::generateStrips() {
 	}
 
 
+
 	//MGlobal::displayInfo(MString() + "------");
 
 	// ------------------------------------------------------------------------------------------
@@ -1027,7 +1174,7 @@ MObject primitiveGenerator::generateStrips() {
 		if (m_type == 0)
 		{
 			MFnNurbsCurve curveFn(m_o_curve);
-			uv_height = (curveFn.length()*(1.0 - m_strandThinning));
+			uv_height = (curveFn.length() * (1.0 - m_strandThinning));
 			uv_height *= m_autoUV_V_mult;
 			//uv_height *= 0.5;
 		}
@@ -1037,7 +1184,7 @@ MObject primitiveGenerator::generateStrips() {
 		{
 
 			MVector ab = m_inLocB_pos - m_inLocA_pos;
-			uv_height = (ab.length()*(1.0 - m_strandThinning));
+			uv_height = (ab.length() * (1.0 - m_strandThinning));
 			uv_height *= m_autoUV_V_mult;
 			//uv_height *= 0.5;
 		}
@@ -1046,16 +1193,21 @@ MObject primitiveGenerator::generateStrips() {
 
 	double u = uv_height / double(m_segments);
 
-	double rotAxis = (m_uvRotate + 180.000)  * (M_PI / 180.0);
+	double rotAxis = (m_uvRotate + 180.000) * (M_PI / 180.0);
 
 	MPoint rotUVP;
+
 
 	for (int s = 0; s < m_numstrands; s++)
 	{
 
 		double vh = 0.0;
 
+
 		for (int i = 0; i < m_segments + 1; i++) {
+
+
+
 
 			float uO = uv_width + u_offset;
 			float vO = 0.0 + v_offset + vh;
@@ -1077,6 +1229,35 @@ MObject primitiveGenerator::generateStrips() {
 
 	uvCounts = faceCounts;
 	uvIds = faceConnects;
+
+
+	if (m_invertNormals)
+	{
+		// flip normals
+
+		MIntArray tempArray;
+		int count = 0;
+
+		for (int i = 0; i < num_faces; i++)
+		{
+			count = count + faceCounts[i];
+			for (int j = 0; j < faceCounts[i]; j++) {
+				if (j == 0) {
+					tempArray.append(faceConnects[count - faceCounts[i]]);
+
+				}
+				else {
+					tempArray.append(faceConnects[count - j]);
+
+				}
+			}
+
+
+		}
+
+		faceConnects = tempArray;
+	}
+
 
 
 	// ------------------------------------------------------------------------------------------
@@ -1155,7 +1336,7 @@ MObject primitiveGenerator::generateTubes()
 	{
 
 
-		double dag = ((M_PI*2.0) / double(m_numstrands)) * double(s);
+		double dag = ((M_PI * 2.0) / double(m_numstrands)) * double(s);
 		double strand_rot = ((360.0 / m_numstrands) * double(s)) / 180.0 * M_PI;
 		double local_rot = m_rotate / 180.0 * M_PI;
 
@@ -1164,21 +1345,26 @@ MObject primitiveGenerator::generateTubes()
 		{
 
 
-			//if (i < m_segments + 1)
-			//{
+		
+			double m_r_override = m_r;
+
+			// Override param for cap segments
+			if (i == m_segments || i == 0)
+			{
+				m_r_override *= m_capChamfer;
+			}
 
 
 
 
-
-			local_rot += ((m_twist / (m_segments + 1)* 10.0) * m_twistProfileA[i]);
+			local_rot += ((m_twist / (m_segments + 1) * 10.0) * m_twistProfileA[i]);
 
 
 
 			for (int j = 0; j < m_sides; j++)
 			{
 
-				double angle = deg * j / 180.0  * M_PI;
+				double angle = deg * j / 180.0 * M_PI;
 
 
 
@@ -1192,8 +1378,8 @@ MObject primitiveGenerator::generateTubes()
 
 					// Calculate tube based on profiles
 
-					x = m_profilePointsA[j].x * (m_r * m_width);
-					z = m_profilePointsA[j].z * (m_r * m_height);
+					x = m_profilePointsA[j].x * (m_r_override * m_width);
+					z = m_profilePointsA[j].z * (m_r_override * m_height);
 
 					x *= m_segmentsProfileA[i];
 					z *= m_segmentsProfileA[i];
@@ -1208,6 +1394,8 @@ MObject primitiveGenerator::generateTubes()
 
 
 
+
+
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0 - m_strandOffsetRandom);
 
@@ -1218,7 +1406,7 @@ MObject primitiveGenerator::generateTubes()
 
 
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
-					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i]) * sin(angle_extra * m_strandCurlWave);
 
 
 
@@ -1226,10 +1414,10 @@ MObject primitiveGenerator::generateTubes()
 					{
 						double inputValue = angle_extra;
 						double amplitudeValueX = m_strandCurl;
-						double frequencyValueX = m_strandCurlWave*0.1;
-						double result_Custom_X = (improvedGradNoise(inputValue*(frequencyValueX), inputValue*(frequencyValueX), inputValue*(frequencyValueX)) * amplitudeValueX);
+						double frequencyValueX = m_strandCurlWave * 0.1;
+						double result_Custom_X = (improvedGradNoise(inputValue * (frequencyValueX), inputValue * (frequencyValueX), inputValue * (frequencyValueX)) * amplitudeValueX);
 
-						offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+						offset_extra = (m_strandCurl * m_stranCurlProfileA[i]) * sin(angle_extra * m_strandCurlWave);
 						offset_extra *= result_Custom_X;
 					}
 
@@ -1281,14 +1469,14 @@ MObject primitiveGenerator::generateTubes()
 						z *= m_strandHeight;
 						z += offset_extra;
 
-						// Add back
+						//// Add back
 
-						double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
-						rnd_rot_mult *= M_PI / 180;
+						//double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
+						//rnd_rot_mult *= M_PI / 180;
 
 
 						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
-						trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult, 0.0, 0.0), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(local_rot, 0.0, 0.0), MSpace::kObject);
 					}
 
 
@@ -1312,8 +1500,8 @@ MObject primitiveGenerator::generateTubes()
 
 					// Calculate tube circle
 
-					x = cos(angle) * (m_r * m_width);
-					z = sin(angle) * (m_r * m_height);
+					x = cos(angle) * (m_r_override * m_width);
+					z = sin(angle) * (m_r_override * m_height);
 
 					x *= m_segmentsProfileA[i];
 					z *= m_segmentsProfileA[i];
@@ -1327,20 +1515,6 @@ MObject primitiveGenerator::generateTubes()
 					MTransformationMatrix trM(trMatrixA[s][i]);
 
 
-					// Override param for cap segments
-					if (i == m_segments || i == 0)
-					{
-						double curr_scale[3];
-
-						trM.getScale(curr_scale, MSpace::kObject);
-
-						curr_scale[0] *= m_rotationRandom;
-						curr_scale[1] *= m_rotationRandom;
-						curr_scale[2] *= m_rotationRandom;
-
-						trM.addScale(curr_scale, MSpace::kObject);
-					}
-
 
 					double mult = rndOffAr[s] * 0.01;
 					mult += (1.0 - m_strandOffsetRandom);
@@ -1352,17 +1526,17 @@ MObject primitiveGenerator::generateTubes()
 
 
 					double strand_offset = (m_strandOffsetProfileA[i] * (m_strandOffset * mult));
-					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+					double offset_extra = (m_strandCurl * m_stranCurlProfileA[i]) * sin(angle_extra * m_strandCurlWave);
 
 
 					if (m_strandCurlType == 1)
 					{
 						double inputValue = angle_extra;
 						double amplitudeValueX = m_strandCurl * 2;
-						double frequencyValueX = m_strandCurlWave*0.1;
-						double result_Custom_X = (improvedGradNoise(inputValue*(frequencyValueX), inputValue*(frequencyValueX), inputValue*(frequencyValueX)) * amplitudeValueX);
+						double frequencyValueX = m_strandCurlWave * 0.1;
+						double result_Custom_X = (improvedGradNoise(inputValue * (frequencyValueX), inputValue * (frequencyValueX), inputValue * (frequencyValueX)) * amplitudeValueX);
 
-						offset_extra = (m_strandCurl * m_stranCurlProfileA[i])*sin(angle_extra*m_strandCurlWave);
+						offset_extra = (m_strandCurl * m_stranCurlProfileA[i]) * sin(angle_extra * m_strandCurlWave);
 						offset_extra *= result_Custom_X;
 					}
 
@@ -1411,12 +1585,12 @@ MObject primitiveGenerator::generateTubes()
 
 						// Add back
 
-						double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
-						rnd_rot_mult *= M_PI / 180;
+						//double rnd_rot_mult = (360.0 * (rndOffAr[s] * 0.01)) * m_rotationRandom;
+						//rnd_rot_mult *= M_PI / 180;
 
 
 						trM.addTranslation(MVector(0.0, x, z), MSpace::kObject);
-						trM.rotateBy(MEulerRotation(local_rot + rnd_rot_mult, 0.0, 0.0), MSpace::kObject);
+						trM.rotateBy(MEulerRotation(local_rot, 0.0, 0.0), MSpace::kObject);
 					}
 
 
@@ -1499,14 +1673,14 @@ MObject primitiveGenerator::generateTubes()
 
 
 						MPoint current_p = pA[vert_id];
-						MPoint first_p = pA[vert_id - (m_segments*m_sides)];
+						MPoint first_p = pA[vert_id - (m_segments * m_sides)];
 
-						MPoint mid_p = MPoint((current_p.x + first_p.x)*0.5,
-							(current_p.y + first_p.y)*0.5,
-							(current_p.z + first_p.z)*0.5);
+						MPoint mid_p = MPoint((current_p.x + first_p.x) * 0.5,
+							(current_p.y + first_p.y) * 0.5,
+							(current_p.z + first_p.z) * 0.5);
 
 						pA[vert_id] = mid_p;
-						pA[vert_id - (m_segments*m_sides)] = mid_p;
+						pA[vert_id - (m_segments * m_sides)] = mid_p;
 					}
 
 
@@ -1518,12 +1692,6 @@ MObject primitiveGenerator::generateTubes()
 
 			}
 		}
-
-
-
-
-
-
 
 	}
 
@@ -1580,20 +1748,6 @@ MObject primitiveGenerator::generateTubes()
 		{
 			faceCounts.append(m_sides);
 		}
-
-
-
-		//if (m_capPoles)
-		//{
-		//	//for (int j = 0; j < m_sides; j++)
-		//	//{
-		//	//	faceCounts.append(4);
-		//	//}
-
-
-		//	faceCounts.append(4);
-
-		//}
 
 
 	}
@@ -1825,11 +1979,9 @@ MObject primitiveGenerator::generateTubes()
 	}
 
 	double u, v;
-	double angle;
+	double angle, cap_off;
 
 	// - UV array Position
-
-
 
 	for (int s = 0; s < m_numstrands; s++)
 	{
@@ -1843,7 +1995,7 @@ MObject primitiveGenerator::generateTubes()
 				double deg = 360.0 / double(m_sides);
 
 				if (i != 0) {
-					angle = deg * double(i) / 180.0  * M_PI;
+					angle = deg * double(i) / 180.0 * M_PI;
 				}
 
 				else {
@@ -1886,7 +2038,7 @@ MObject primitiveGenerator::generateTubes()
 			if (m_type == 0)
 			{
 				MFnNurbsCurve curveFn(m_o_curve);
-				m_vWidth = (curveFn.length()*(1.0 - m_strandThinning));
+				m_vWidth = (curveFn.length() * (1.0 - m_strandThinning));
 				m_vWidth *= m_autoUV_V_mult;
 			}
 
@@ -1895,21 +2047,39 @@ MObject primitiveGenerator::generateTubes()
 			{
 
 				MVector ab = m_inLocB_pos - m_inLocA_pos;
-				m_vWidth = (ab.length()*(1.0 - m_strandThinning));
+				m_vWidth = (ab.length() * (1.0 - m_strandThinning));
 				m_vWidth *= m_autoUV_V_mult;
 			}
 		}
 
 		for (int i = 0; i < m_segments + 1; i++) {
 
+
+
 			for (int j = 0; j < m_sides + 1; j++) {
+
+
+				cap_off = 0;
+
+				if (i == 0) {
+					cap_off = -(m_capChamfer / m_segments);
+				}
+
+				if (i == m_segments) {
+					cap_off = m_capChamfer / m_segments;
+				}
+
 				u = double(j) / (m_sides * (1.0 / m_uWidth));
 				v = double(i) / (m_segments * (1.0 / m_vWidth));
+
+				//v +=  cap_off;
 
 				double uO = u + m_uOffset;
 				double vO = v + m_vOffset;
 
-				double rotAxis = (m_uvRotate + 180.000)  * (M_PI / 180.0);
+				vO -= cap_off;
+
+				double rotAxis = (m_uvRotate + 180.000) * (M_PI / 180.0);
 
 				MPoint rotUVP = rotate_point(uO, vO, rotAxis, MPoint(m_uOffset, m_vOffset, 0.0));
 
@@ -1926,9 +2096,12 @@ MObject primitiveGenerator::generateTubes()
 
 			for (int i = 0; i < m_sides; i++) {
 
+
+
+
 				double deg = 360.0 / double(m_sides);
 
-				double angle = deg * double(i) / 180.0  * M_PI;
+				double angle = deg * double(i) / 180.0 * M_PI;
 				double angleRot = m_rotate / 180.0 * M_PI;
 
 				if (!m_useProfile) {
@@ -1946,7 +2119,7 @@ MObject primitiveGenerator::generateTubes()
 					v = m_profilePointsA[i].z * m_capUVsize;
 				}
 
-				u += m_capUVsize*2.0;
+				u += m_capUVsize * 2.0;
 
 				uArray.append(u + m_uOffsetCap);
 				vArray.append(v + m_vOffsetCap);
@@ -1961,6 +2134,34 @@ MObject primitiveGenerator::generateTubes()
 	for (int i = 0; i < pA.length(); i++)
 	{
 		pA[i] = pA[i] * m_curveMatrix;
+	}
+
+
+	if (m_invertNormals)
+	{
+		// flip normals
+
+		MIntArray tempArray;
+		int count = 0;
+
+		for (int i = 0; i < num_faces; i++)
+		{
+			count = count + faceCounts[i];
+			for (int j = 0; j < faceCounts[i]; j++) {
+				if (j == 0) {
+					tempArray.append(faceConnects[count - faceCounts[i]]);
+
+				}
+				else {
+					tempArray.append(faceConnects[count - j]);
+
+				}
+			}
+
+
+		}
+
+		faceConnects = tempArray;
 	}
 
 
@@ -2063,6 +2264,10 @@ MObject primitiveGenerator::generateTubes()
 	//		}
 	//	}
 	//}
+
+
+
+
 
 
 
@@ -2206,7 +2411,7 @@ MStatus primitiveGenerator::compute(const MPlug& plug, MDataBlock& data)
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandOffsetRandom = data.inputValue(aStrandOffsetRandom, &status).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
-	m_rotationRandom = data.inputValue(aRotationRandom, &status).asDouble();
+	m_capChamfer = data.inputValue(aCapChamfer, &status).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
 	m_strandCurl = data.inputValue(aStrandCurl, &status).asDouble();
 	CHECK_MSTATUS_AND_RETURN_IT(status);
@@ -2309,6 +2514,7 @@ MStatus primitiveGenerator::compute(const MPlug& plug, MDataBlock& data)
 	if (m_segments <= 1) { m_segments = 1; }
 
 
+
 	// AB locator
 	MMatrix m_inLocA_posM = data.inputValue(aInLocAPos).asMatrix();
 	MMatrix m_inLocB_posM = data.inputValue(aInLocBPos).asMatrix();
@@ -2343,7 +2549,7 @@ MStatus primitiveGenerator::compute(const MPlug& plug, MDataBlock& data)
 		}
 
 		// Failsafe check again... just to be sure
-		if (m_segments <= 1) { m_segments = 1; }
+		if (m_segments <= 2) { m_segments = 2; }
 
 	}
 
@@ -2354,10 +2560,17 @@ MStatus primitiveGenerator::compute(const MPlug& plug, MDataBlock& data)
 	}
 
 
-	// Add cap segments
+	// For everything else, add cap segments
+	else
+	{
+		// Add cap segments
+		m_cap_segments = 2;
+		m_segments += m_cap_segments;
+	}
 
-	m_cap_segments = 2;
-	m_segments += m_cap_segments;
+	
+	
+
 
 
 	//MObject m_inCurve = data.inputValue(aInCurve, &status).asNurbsCurve();
@@ -2775,14 +2988,14 @@ MStatus primitiveGenerator::initialize()
 	nAttr.setHidden(false);
 	addAttribute(primitiveGenerator::aStrandOffsetRandom);
 
-	primitiveGenerator::aRotationRandom = nAttr.create("rotationRandom", "rotationRandom", MFnNumericData::kDouble);
-	nAttr.setDefault(0.0);
+	primitiveGenerator::aCapChamfer = nAttr.create("capChamfer", "capChamfer", MFnNumericData::kDouble);
+	nAttr.setDefault(0.7);
 	nAttr.setMin(0.0);
 	nAttr.setMax(1.0);
 	nAttr.setKeyable(true);
 	nAttr.setChannelBox(true);
 	nAttr.setHidden(false);
-	addAttribute(primitiveGenerator::aRotationRandom);
+	addAttribute(primitiveGenerator::aCapChamfer);
 
 
 	primitiveGenerator::aStrandThinning = nAttr.create("strandThinning", "strandThinning", MFnNumericData::kDouble);
@@ -3056,7 +3269,7 @@ MStatus primitiveGenerator::initialize()
 	attributeAffects(primitiveGenerator::aCurveZOffset, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffset, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandOffsetRandom, primitiveGenerator::aOutMesh);
-	attributeAffects(primitiveGenerator::aRotationRandom, primitiveGenerator::aOutMesh);
+	attributeAffects(primitiveGenerator::aCapChamfer, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinning, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinningRandomness, primitiveGenerator::aOutMesh);
 	attributeAffects(primitiveGenerator::aStrandThinningSeed, primitiveGenerator::aOutMesh);

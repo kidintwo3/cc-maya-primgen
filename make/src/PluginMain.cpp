@@ -22,43 +22,8 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "2.03", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "2.1", "Any");
 
-
-	//bool check_lic = false;
-
-	//// Licence Check
-
-	//if (check_lic)
-	//{
-
-
-
-	//	MString plugin_name = "PrimGen";
-
-	//	// MString lic_key = MString(std::getenv("PRIMGEN_LICENSE_KEY"));
-	//	MString lic_key = "D0F9F4D8-50FD4FE3-A411C173-FB6C77C7";
-
-	//	if (!checkLic(lic_key))
-	//	{
-	//		MGlobal::displayInfo( "--------------------------------------------");
-	//		MGlobal::displayInfo("["+plugin_name+"] No licence found!");
-	//		MGlobal::displayInfo( "Make sure the Maya.env file has your licence");
-	//		MGlobal::displayInfo( "--------------------------------------------");
-
-	//		MGlobal::executeCommand("inViewMessage -smg \"["+plugin_name+"] No licence found!\" -pos midCenter -bkc 0x00750000 -fade;");
-
-	//		return MStatus::kFailure;
-
-	//	} 
-
-	//	else
-	//	{
-	//		MGlobal::displayInfo("["+plugin_name+"] Licence found!");
-	//	}
-
-
-	//}
 
 	// Icon / UI rebuild check
 
@@ -76,7 +41,13 @@ MStatus initializePlugin( MObject obj )
 		MGlobal::executeCommand( mel_createShelf() );
 	}
 
-	MGlobal::executeCommand( mel_AETemplate() );
+	MStringArray aeTemplateA = mel_AETemplate();
+
+	for (int i = 0; i < aeTemplateA.length(); i++)
+	{
+		MGlobal::executeCommand(aeTemplateA[i]);
+	}
+
 
 	status = fnPlugin.registerCommand( "primitiveGeneratorCommand", primitiveGeneratorCommand::creator, primitiveGeneratorCommand::newSyntax );
 	CHECK_MSTATUS_AND_RETURN_IT( status );

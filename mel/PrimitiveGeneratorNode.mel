@@ -8,6 +8,7 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
         editorTemplate -addControl "width";
         editorTemplate -addControl "height";
 		editorTemplate -label "Custom Sides" -addControl "sides";
+		editorTemplate -addControl "capChamfer";
 		editorTemplate -addSeparator;
 		editorTemplate -addControl "alingToUpVector";
 		editorTemplate -addControl "firstUpVec";
@@ -86,6 +87,8 @@ global proc AEprimitiveGeneratorTemplate( string $nodeName )
         editorTemplate -addControl "smoothNormals";
 		editorTemplate -addControl "invertNormals";
         editorTemplate -addControl "capTop";
+		editorTemplate -addControl "doNotConnect";
+		editorTemplate -addControl "closedCircle";
 		editorTemplate -addControl "baseMeshDisplayOverride";
     editorTemplate -endLayout;
     
