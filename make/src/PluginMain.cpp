@@ -22,7 +22,7 @@
 MStatus initializePlugin( MObject obj )
 {
 	MStatus		status;
-	MFnPlugin	fnPlugin( obj, "Creative Case", "2.1", "Any");
+	MFnPlugin	fnPlugin( obj, "Creative Case", "2.12", "Any");
 
 
 	// Icon / UI rebuild check

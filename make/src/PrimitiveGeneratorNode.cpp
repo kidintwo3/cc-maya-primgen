@@ -1909,7 +1909,7 @@ MObject primitiveGenerator::generateTubes()
 			counter += m_sides + 1;
 		}
 
-
+		counter += m_sides + 1;
 
 		// Top cap
 		if (m_capTop)
@@ -1919,6 +1919,8 @@ MObject primitiveGenerator::generateTubes()
 			{
 
 				uvIds.append(i + counter);
+
+				//MGlobal::displayInfo(MString() + (i +  counter));
 			}
 
 			counter += m_sides;
@@ -1926,23 +1928,23 @@ MObject primitiveGenerator::generateTubes()
 
 		//if (m_capPoles)
 		//{
-		//	for (int i = 0; i < m_sides; i++) {
+			//for (int i = 0; i < m_sides; i++) {
 
-		//		v1 = i + 0 + counter;
-		//		v2 = i + 1 + counter;
-		//		v3 = i + 2 + m_sides + counter;
-		//		v4 = i + 1 + m_sides + counter;
+			//	v1 = i + 0 + counter;
+			//	v2 = i + 1 + counter;
+			//	v3 = i + 2 + m_sides + counter;
+			//	v4 = i + 1 + m_sides + counter;
 
 
-		//		uvIds.append(v1);
-		//		uvIds.append(v2);
-		//		uvIds.append(v3);
-		//		uvIds.append(v4);
+			//	uvIds.append(v1);
+			//	uvIds.append(v2);
+			//	uvIds.append(v3);
+			//	uvIds.append(v4);
 
-		//	}
+			//}
 		//}
 
-		counter += m_sides + 1;
+		//counter += m_sides + 1;
 	}
 
 	counter = 0;
@@ -1970,10 +1972,10 @@ MObject primitiveGenerator::generateTubes()
 
 		//if (m_capPoles)
 		//{
-		//	for (int i = 0; i < m_sides; i++) {
+			//for (int i = 0; i < m_sides; i++) {
 
-		//		uvCounts.append(4);
-		//	}
+			//	uvCounts.append(4);
+			//}
 		//}
 
 	}
@@ -2016,11 +2018,8 @@ MObject primitiveGenerator::generateTubes()
 
 				if (m_useProfile)
 				{
-
 					u = m_profilePointsA[i].x * m_capUVsize;
 					v = m_profilePointsA[i].z * m_capUVsize;
-
-
 				}
 
 
@@ -2052,32 +2051,36 @@ MObject primitiveGenerator::generateTubes()
 			}
 		}
 
-		for (int i = 0; i < m_segments + 1; i++) {
+		for (int i = 0; i < m_segments + 1; i++) 
+		{
 
-
-
-			for (int j = 0; j < m_sides + 1; j++) {
-
-
-				cap_off = 0;
-
-				if (i == 0) {
-					cap_off = -(m_capChamfer / m_segments);
-				}
-
-				if (i == m_segments) {
-					cap_off = m_capChamfer / m_segments;
-				}
+			for (int j = 0; j < m_sides + 1; j++) 
+			{
 
 				u = double(j) / (m_sides * (1.0 / m_uWidth));
-				v = double(i) / (m_segments * (1.0 / m_vWidth));
 
-				//v +=  cap_off;
+
+				// LERP test
+		/*		if (i == 0 || i == m_segments)
+				{
+					u = u + (m_capChamfer) * (0.5 - u);
+				}*/
+
+				double v_sec = double(i) / (double(m_segments) * (1.0 / m_vWidth));
+				v = v_sec;
 
 				double uO = u + m_uOffset;
 				double vO = v + m_vOffset;
 
-				vO -= cap_off;
+				if (i == 0)
+				{
+					vO += ((1.0 * m_vWidth) / double(m_segments)) * m_capChamfer;
+				}
+
+				if (i == m_segments) 
+				{
+					vO -= (v_sec / double(i)) * m_capChamfer;
+				}
 
 				double rotAxis = (m_uvRotate + 180.000) * (M_PI / 180.0);
 
@@ -2094,27 +2097,35 @@ MObject primitiveGenerator::generateTubes()
 		if (m_capTop)
 		{
 
-			for (int i = 0; i < m_sides; i++) {
+	
 
-
-
+			for (int i = 0; i < m_sides; i++)
+			{
 
 				double deg = 360.0 / double(m_sides);
 
-				double angle = deg * double(i) / 180.0 * M_PI;
+				if (i != 0) {
+					angle = deg * double(i) / 180.0 * M_PI;
+				}
+
+				else {
+					angle = 0.0;
+				}
 				double angleRot = m_rotate / 180.0 * M_PI;
 
-				if (!m_useProfile) {
+				u = cos(angle) * m_capUVsize;
+				v = sin(angle) * m_capUVsize;
+
+				if (!m_useProfile)
+				{
 
 					u = cos(angle + angleRot) * m_capUVsize;
 					v = sin(angle + angleRot) * m_capUVsize;
-
 				}
 
 
 				if (m_useProfile)
 				{
-
 					u = m_profilePointsA[i].x * m_capUVsize;
 					v = m_profilePointsA[i].z * m_capUVsize;
 				}
